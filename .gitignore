@@ -31,12 +31,6 @@ cores/*/mister/*
 */obj_dir/*
 .simvision
 ncverilog.*
-rom/1942/*
-rom/1943*/*
-rom/gng/*
-rom/gngroms/*
-rom/commando/*
-rom/*zip
 rom/*
 *.smsg
 *.summary
