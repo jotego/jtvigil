@@ -47,20 +47,21 @@
             <part name="vg_b-4j-.ic35" crc="4f5872f0" map="10"/>
         </interleave>
         <part repeat="0x20000"> FF</part>
-        <!-- gfx2 - starts at 0x80000 -->
-        <interleave output="16">
-            <part name="vg_b-6l-.ic62" crc="fbe9552d" map="01"/>
-            <part name="vg_b-6k-.ic61" crc="ae09d5c0" map="10"/>
-        </interleave>
-        <interleave output="16">
-            <part name="vg_b-6p-.ic64" crc="afb77461" map="01"/>
-            <part name="vg_b-6n-.ic63" crc="5065cd35" map="10"/>
-        </interleave>
-        <!-- gfx3 - starts at 0x100000 -->
+        <!-- gfx3 - starts at 0x80000 -->
         <part name="vg_b-1d-.ic2" crc="81b1ee5c"/>
         <part name="vg_b-1f-.ic3" crc="d0d33673"/>
         <part name="vg_b-1h-.ic4" crc="aae81695"/>
-        <!-- Total 0x130000 bytes - 1216 kBytes -->
+        <part repeat="0x10000"> FF</part>
+        <!-- gfx2 - starts at 0xC0000 -->
+        <interleave output="16">
+            <part name="vg_b-6l-.ic62" crc="fbe9552d" map="01"/>
+            <part name="vg_b-6p-.ic64" crc="afb77461" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="vg_b-6k-.ic61" crc="ae09d5c0" map="01"/>
+            <part name="vg_b-6n-.ic63" crc="5065cd35" map="10"/>
+        </interleave>
+        <!-- Total 0x140000 bytes - 1280 kBytes -->
     </rom>
     <rom index="17" zip="jtbeta.zip" md5="None">
         <part name="beta.bin"/>

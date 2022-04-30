@@ -47,28 +47,29 @@
             <part name="h05_c09.bin" crc="4f5872f0" map="10"/>
         </interleave>
         <part repeat="0x20000"> FF</part>
-        <!-- gfx2 - starts at 0x80000 -->
-        <interleave output="16">
-            <part name="n07_c12.bin" crc="10af8eb2" map="01"/>
-            <part name="k07_c10.bin" crc="9576f304" map="10"/>
-        </interleave>
-        <interleave output="16">
-            <part name="o07_c13.bin" crc="b1d9d4dc" map="01"/>
-            <part name="l07_c11.bin" crc="4598be4a" map="10"/>
-        </interleave>
-        <interleave output="16">
-            <part name="t07_c16.bin" crc="f5425e42" map="01"/>
-            <part name="p07_c14.bin" crc="cb50a17c" map="10"/>
-        </interleave>
-        <interleave output="16">
-            <part name="v07_c17.bin" crc="959ba3c7" map="01"/>
-            <part name="s07_c15.bin" crc="7f2e91c5" map="10"/>
-        </interleave>
-        <!-- gfx3 - starts at 0x100000 -->
+        <!-- gfx3 - starts at 0x80000 -->
         <part name="d01_c05.bin" crc="81b1ee5c"/>
         <part name="e01_c06.bin" crc="d0d33673"/>
         <part name="f01_c07.bin" crc="aae81695"/>
-        <!-- Total 0x130000 bytes - 1216 kBytes -->
+        <part repeat="0x10000"> FF</part>
+        <!-- gfx2 - starts at 0xC0000 -->
+        <interleave output="16">
+            <part name="n07_c12.bin" crc="10af8eb2" map="01"/>
+            <part name="o07_c13.bin" crc="b1d9d4dc" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="t07_c16.bin" crc="f5425e42" map="01"/>
+            <part name="v07_c17.bin" crc="959ba3c7" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="k07_c10.bin" crc="9576f304" map="01"/>
+            <part name="l07_c11.bin" crc="4598be4a" map="10"/>
+        </interleave>
+        <interleave output="16">
+            <part name="p07_c14.bin" crc="cb50a17c" map="01"/>
+            <part name="s07_c15.bin" crc="7f2e91c5" map="10"/>
+        </interleave>
+        <!-- Total 0x140000 bytes - 1280 kBytes -->
     </rom>
     <rom index="17" zip="jtbeta.zip" md5="None">
         <part name="beta.bin"/>
