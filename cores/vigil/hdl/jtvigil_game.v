@@ -101,6 +101,10 @@ wire        main_ok, scr1_ok, scr2_ok, obj_ok, adpck_ok;
 wire [ 7:0] main_dout, pal_dout, obj_dout;
 wire        main_rnw;
 
+// Scroll configuration
+wire [10:0] scr1pos, scr2pos;
+wire [ 2:0] scr2col;
+
 // Cabinet inputs
 wire [ 7:0] dipsw_a, dipsw_b;
 
@@ -119,10 +123,8 @@ jtvigil_main u_main(
     .clk        ( clk24     ),
     // Video
     .LVBL       ( LVBL      ),
-    .LHBL       ( LHBL      ),
     // Sound communication
-    .snd_latch  ( snd_latch ),
-    .snreq      ( snreq     ),
+    .latch_cs   ( snd_latch ),
     // Palette
     .pal_cs     ( pal_cs    ),
     .pal_dout   ( pal_dout  ),
@@ -131,7 +133,6 @@ jtvigil_main u_main(
     // Objects
     .obj_cs     ( objram_cs ),
     .obj_copy   ( obj_copy  ),
-    .mixpsel    ( mixpsel   ),
     .obj_dout   ( obj_dout  ),
 
     // CPU bus
@@ -146,17 +147,12 @@ jtvigil_main u_main(
     .start_button(start_button),
     .coin_input  ( coin_input ),
     .service     ( service    ),
-    // RAM access
-    .ram_cs      ( ram_cs     ),
-    .ram_data    ( ram_data   ),
-    .ram_ok      ( ram_ok     ),
     // ROM access
     .rom_cs      ( main_cs    ),
     .rom_data    ( main_data  ),
     .rom_ok      ( main_ok    ),
     // DIP switches
     .dip_pause   ( dip_pause  ),
-    .dip_test    ( dip_test   ),
     .dipsw_a     ( dipsw_a    ),
     .dipsw_b     ( dipsw_b    )
 );
@@ -180,6 +176,7 @@ jtvigil_video u_video(
     .scr1_addr  ( scr1_addr ),
     .scr1_data  ( scr1_data ),
 
+    .scr2pos    ( scr2pos   ),
     .scr2_cs    ( scr2_cs   ),
     .scr2_ok    ( scr2_ok   ),
     .scr2_addr  ( scr2_addr ),
