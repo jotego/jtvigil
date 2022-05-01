@@ -72,10 +72,17 @@ assign ydiff     = ypos - vf;
 // Table scan
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
+        aux_cen <= 0;
+    end else begin
+        aux_cen <= ~aux_cen;
+    end
+end
+
+always @(posedge clk, posedge rst) begin
+    if( rst ) begin
         done     <= 0;
         obj_cnt  <= 0;
         sub_cnt  <= 0;
-        aux_cen  <= 0;
         vf       <= 0;
         LHBL_l   <= 0;
         dr_start <= 0;

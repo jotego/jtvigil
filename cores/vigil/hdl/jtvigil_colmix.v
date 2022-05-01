@@ -59,6 +59,7 @@ module jtvigil_colmix(
     input      [2:0] scr2col,
     input      [3:0] scr2_pxl,
     input      [7:0] obj_pxl,
+    input            scr2enb,
 
     // Debug
     input      [3:0] gfx_en,
@@ -100,7 +101,9 @@ always @(posedge clk, posedge rst) begin
             { red, green, blue } <= ( !LVBL || !LHBL ) ? 15'd0 : {pre_r, pre_g, pre_b};
             if( obj_blank || scr1_wins ) begin
                 sel      <= SCR[0];
-                pal_base <= scr1_blank ? { scr2col[2:1], 1'b0, scr2col[0], scr2_pxl } : scr1_pxl;
+                pal_base <=
+                    scr2enb    ? scr1_pxl :
+                    scr1_blank ? { scr2col[2:1], 1'b0, scr2col[0], scr2_pxl } : scr1_pxl;
             end else begin
                 sel      <= OBJ[0];
                 pal_base <= obj_pxl;

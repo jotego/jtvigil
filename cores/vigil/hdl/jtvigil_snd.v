@@ -32,7 +32,7 @@ module jtvigil_snd(
     input         [ 7:0] rom_data,
     input                rom_ok,
 
-    output    reg        pcm_cs,
+    output               pcm_cs,
     output    reg [15:0] pcm_addr,
     input         [ 7:0] pcm_data,
     input                pcm_ok,
@@ -110,10 +110,11 @@ always @(posedge clk, posedge rst) begin
         cpu_din <= 0;
     end else begin
         cpu_din <=
-            rom_cs  ? rom_data :
-            ram_cs  ? ram_dout :
-            pcm_rd  ? pcm_data :
-            fm_cs   ? fm_dout  : 8'hff;
+            rom_cs   ? rom_data :
+            ram_cs   ? ram_dout :
+            pcm_rd   ? pcm_data :
+            latch_cs ? latch    :
+            fm_cs    ? fm_dout  : 8'hff;
     end
 end
 

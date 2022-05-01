@@ -36,6 +36,7 @@ module jtvigil_main(
     output  reg [ 8:0] scr1pos,
     output  reg [10:0] scr2pos,
     output  reg [ 2:0] scr2col,
+    output  reg        scr2enb,
     // Object
     output  reg        scr_cs,
     output  reg        obj_cs,
@@ -104,6 +105,7 @@ always @(posedge clk, posedge rst) begin
         scr2pos <= 0;
         scr2col <= 0;
         flip    <= 0;
+        scr2enb <= 0;
     end else begin
         flip <= flipr ^ dipsw_b[0];
         if( bank_cs    ) bank <= cpu_dout[2:0];
@@ -125,6 +127,7 @@ always @(posedge clk, posedge rst) begin
         end
         if( scr2col_cs ) begin
             // bit 6 ROME ? ROMF ?
+            scr2enb <= cpu_dout[6];
             scr2col <= {cpu_dout[3], cpu_dout[1:0]};
         end
     end

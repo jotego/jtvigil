@@ -48,6 +48,7 @@ module jtvigil_video(
     input  [31:0] scr2_data,
     output        scr2_cs,
     input         scr2_ok,
+    input         scr2enb,
 
     input         oram_cs,
     output [17:0] obj_addr,

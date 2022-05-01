@@ -100,7 +100,7 @@ wire        main_cs, scr1_cs, scr2_cs, obj_cs, pcm_cs, snd_cs;
 wire [17:0] main_addr, scr2_addr, obj_addr;
 wire [15:0] pcm_addr, snd_addr;
 wire [16:0] scr1_addr;
-wire [ 7:0] main_data, snd_data, pcm_data, snd_data;
+wire [ 7:0] main_data, snd_data, pcm_data;
 wire [31:0] scr1_data, scr2_data, obj_data;
 wire        main_ok, scr1_ok, scr2_ok, obj_ok, pcm_ok, snd_ok;
 
@@ -112,7 +112,7 @@ wire        main_rnw, latch_wr, pal_cs, oram_cs, scr1_ramcs;
 wire [ 8:0] scr1pos;
 wire [10:0] scr2pos;
 wire [ 2:0] scr2col;
-wire        flip;
+wire        flip, scr2enb;
 
 // Cabinet inputs
 wire [ 7:0] dipsw_a, dipsw_b;
@@ -150,6 +150,7 @@ jtvigil_main u_main(
     .scr1pos     ( scr1pos    ),
     .scr2pos     ( scr2pos    ),
     .scr2col     ( scr2col    ),
+    .scr2enb     ( scr2enb    ),
     .obj_cs      ( oram_cs    ),
 
     // CPU bus
@@ -199,6 +200,7 @@ jtvigil_video u_video(
     .scr2_ok    ( scr2_ok   ),
     .scr2_addr  ( scr2_addr ),
     .scr2_data  ( scr2_data ),
+    .scr2enb    ( scr2enb   ),
 
     // Object
     .oram_cs    ( oram_cs   ),
