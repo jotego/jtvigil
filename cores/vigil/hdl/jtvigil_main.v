@@ -22,6 +22,7 @@ module jtvigil_main(
     input              cpu_cen,
 
     // BUS sharing
+    output      [17:0] main_addr,
     output             main_rnw,
     output             [7:0] cpu_dout,
 
@@ -36,7 +37,11 @@ module jtvigil_main(
     output  reg [10:0] scr2pos,
     output  reg [ 2:0] scr2col,
     // Object
+    output  reg        scr_cs,
     output  reg        obj_cs,
+    output  reg        pal_cs,
+    input   [7:0]      pal_dout,
+    input   [7:0]      scr_dout,
     // cabinet I/O
     input   [5:0]      joystick1,
     input   [5:0]      joystick2,
@@ -44,14 +49,12 @@ module jtvigil_main(
     input   [1:0]      coin_input,
     input              service,
     // DIP switches
-    input              dip_flip,    // Not a DIP in the original board ;-)
     input    [7:0]     dipsw_a,
     input    [7:0]     dipsw_b,
     // ROM access
     output  reg        rom_cs,
-    output      [17:0] rom_addr,
     input       [ 7:0] rom_data,
-    input              rom_ok,
+    input              rom_ok
 );
 
 wire [15:0] A;
@@ -68,7 +71,7 @@ wire        int_n;
 
 assign main_rnw = wr_n;
 assign int_n    = LVBL | ~dip_pause;
-assign rom_addr = A[15] ? { 1'b0, bank, rom_addr[13:0] } + 18'h8000 : { 3'd0, rom_addr[14:0] };
+assign main_addr = A[15] ? { 1'b0, bank, A[13:0] } + 18'h8000 : { 3'd0, A[14:0] };
 
 always @(posedge clk) rst_n <= ~rst;
 
@@ -100,9 +103,9 @@ always @(posedge clk, posedge rst) begin
         scr1pos <= 0;
         scr2pos <= 0;
         scr2col <= 0;
-        FLIP    <= 0;
+        flip    <= 0;
     end else begin
-        flip <= flipr ^ dip2_cs[0];
+        flip <= flipr ^ dipsw_b[0];
         if( bank_cs    ) bank <= cpu_dout[2:0];
         if( out2_cs ) begin
             // COA1 COB1 ?
@@ -110,7 +113,7 @@ always @(posedge clk, posedge rst) begin
         end
         if( scr1pos_cs ) begin
             if( A[0] )
-                scr1pos[10:8] <= cpu_dout[2:0];
+                scr1pos[8]    <= cpu_dout[0];
             else
                 scr1pos[ 7:0] <= cpu_dout;
         end
@@ -134,6 +137,8 @@ always @(posedge clk, posedge rst) begin
         cpu_din <=
             rom_cs  ? rom_data :
             ram_cs  ? ram_dout :
+            pal_cs  ? pal_dout :
+            scr_cs  ? scr_dout : // I think the scroll cannot be read, but sch. are blurry
             in0_cs  ? { 4'hf, coin_input[0], service, start_button } :
             in1_cs  ? { joystick1[5], 1'b1, joystick1[4], 1'b1, joystick1[3:0] } :
             in2_cs  ? { joystick2[5], 1'b1, joystick2[4], 1'b1, joystick2[3:0] } :
@@ -144,11 +149,11 @@ end
 
 jtframe_sysz80 #(
     .RAM_AW     ( 12        ),
-    .CLR_INT    ( 1         ),
+    .CLR_INT    ( 1         )
 ) u_cpu(
     .rst_n      ( rst_n     ),
-    .clk,       ( clk       )
-    .cen,       ( cpu_cen   )
+    .clk        ( clk       ),
+    .cen        ( cpu_cen   ),
     .cpu_cen    (           ),
     .int_n      ( int_n     ),
     .nmi_n      ( 1'b1      ),

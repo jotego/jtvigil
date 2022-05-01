@@ -23,9 +23,6 @@ module jtvigil_game(
     input           clk24,
     output          pxl2_cen,   // 12   MHz
     output          pxl_cen,    //  6   MHz
-    output   [7:0]  red,
-    output   [7:0]  green,
-    output   [7:0]  blue,
     output          LHBL_dly,
     output          LVBL_dly,
     output          HS,
@@ -33,8 +30,8 @@ module jtvigil_game(
     // cabinet I/O
     input   [ 1:0]  start_button,
     input   [ 1:0]  coin_input,
-    input   [ 8:0]  joystick1,
-    input   [ 8:0]  joystick2,
+    input   [ 5:0]  joystick1,
+    input   [ 5:0]  joystick2,
 
     // SDRAM interface
     input           downloading,
@@ -46,6 +43,9 @@ module jtvigil_game(
     output   [21:0] ba2_addr,
     output   [21:0] ba3_addr,
     output   [ 3:0] ba_rd,
+    output          ba_wr,
+    output   [15:0] ba0_din,
+    output   [ 1:0] ba0_din_m,  // write mask
     input    [ 3:0] ba_ack,
     input    [ 3:0] ba_dst,
     input    [ 3:0] ba_dok,
@@ -81,6 +81,10 @@ module jtvigil_game(
     output          game_led,
     input           enable_psg,
     input           enable_fm,
+    // color output
+    output   [4:0]  red,
+    output   [4:0]  green,
+    output   [4:0]  blue,
     // Debug
     input   [3:0]   gfx_en,
     input   [7:0]   debug_bus,
@@ -92,29 +96,36 @@ wire        cpu_cen, fm_cen;
 wire        LVBL, LHBL;
 
 // SDRAM interface
-wire        main_cs, scr1_cs, scr2_cs, obj_cs, pcm_cs;
-wire [17:0] main_addr, scr2_addr;
+wire        main_cs, scr1_cs, scr2_cs, obj_cs, pcm_cs, snd_cs;
+wire [17:0] main_addr, scr2_addr, obj_addr;
 wire [15:0] pcm_addr, snd_addr;
 wire [16:0] scr1_addr;
-wire [ 7:0] main_data, snd_data, pcm_data;
+wire [ 7:0] main_data, snd_data, pcm_data, snd_data;
 wire [31:0] scr1_data, scr2_data, obj_data;
-wire        main_ok, scr1_ok, scr2_ok, obj_ok, adpck_ok;
+wire        main_ok, scr1_ok, scr2_ok, obj_ok, pcm_ok, snd_ok;
 
 // CPU interface
-wire [ 7:0] main_dout, pal_dout, obj_dout;
-wire        main_rnw, latch_wr;
+wire [ 7:0] main_dout, pal_dout, scr1_dout;
+wire        main_rnw, latch_wr, pal_cs, oram_cs, scr1_ramcs;
 
 // Scroll configuration
 wire [ 8:0] scr1pos;
 wire [10:0] scr2pos;
 wire [ 2:0] scr2col;
+wire        flip;
 
 // Cabinet inputs
 wire [ 7:0] dipsw_a, dipsw_b;
 
 
 assign { dipsw_b, dipsw_a } = dipsw[15:0];
-assign dip_flip = ~flip;
+assign dip_flip             = ~flip;
+assign ba_wr                = 0;
+assign ba0_din              = 0;
+assign ba0_din_m            = 3;
+assign LHBL_dly             = LHBL;
+assign LVBL_dly             = LVBL;
+assign debug_view           = {5'd0, scr2col};
 
 jtframe_cen3p57 #(.CLK24(1)) u_cencpu(
     .clk        ( clk24     ),
@@ -125,22 +136,24 @@ jtframe_cen3p57 #(.CLK24(1)) u_cencpu(
 jtvigil_main u_main(
     .rst         ( rst24      ),
     .clk         ( clk24      ),
+    .cpu_cen     ( cpu_cen    ),
     // Video
     .LVBL        ( LVBL       ),
     // Sound communication
-    .latch_wr    ( snd_latch  ),
+    .latch_wr    ( latch_wr   ),
     // Palette
     .pal_cs      ( pal_cs     ),
     .pal_dout    ( pal_dout   ),
+    .scr_dout    ( scr1_dout  ),
     // Video circuitry
+    .scr_cs      ( scr1_ramcs ),
     .scr1pos     ( scr1pos    ),
     .scr2pos     ( scr2pos    ),
     .scr2col     ( scr2col    ),
-    // Objects
-    .oram_cs     ( oram_cs    ),
+    .obj_cs      ( oram_cs    ),
 
     // CPU bus
-    .cpu_addr    ( main_addr  ),
+    .main_addr   ( main_addr  ),
     .cpu_dout    ( main_dout  ),
     .main_rnw    ( main_rnw   ),
     // cabinet I/O
@@ -154,6 +167,7 @@ jtvigil_main u_main(
     .rom_data    ( main_data  ),
     .rom_ok      ( main_ok    ),
     // DIP switches
+    .flip        ( flip       ),
     .dip_pause   ( dip_pause  ),
     .dipsw_a     ( dipsw_a    ),
     .dipsw_b     ( dipsw_b    )
@@ -167,17 +181,20 @@ jtvigil_video u_video(
     .pxl_cen    ( pxl_cen   ),
 
     // CPU interface
-    .cpu_addr   ( main_addr[11:0] ),
-    .cpu_dout   ( main_dout ),
-    .cpu_rnw    ( main_rnw  ),
-    .latch_wr   ( latch_wr  ),  // sound
+    .main_addr  ( main_addr[11:0] ),
+    .main_dout  ( main_dout ),
+    .main_rnw   ( main_rnw  ),
     // Scroll
+    .scr1pos    ( scr1pos   ),
+    .scr1_ramcs ( scr1_ramcs),
     .scr1_cs    ( scr1_cs   ),
     .scr1_ok    ( scr1_ok   ),
     .scr1_addr  ( scr1_addr ),
     .scr1_data  ( scr1_data ),
+    .scr1_dout  ( scr1_dout ),
 
     .scr2pos    ( scr2pos   ),
+    .scr2col    ( scr2col   ),
     .scr2_cs    ( scr2_cs   ),
     .scr2_ok    ( scr2_ok   ),
     .scr2_addr  ( scr2_addr ),
@@ -239,9 +256,12 @@ jtvigil_video u_video(
     );
 `else
     assign snd_cs   = 0;
-    assign pcm_cs = 0;
+    assign pcm_cs   = 0;
     assign snd      = 0;
     assign game_led = 0;
+    assign sample   = 0;
+    assign pcm_addr = 0;
+    assign snd_addr = 0;
 `endif
 
 jtvigil_sdram u_sdram(

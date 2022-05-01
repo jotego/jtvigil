@@ -119,11 +119,11 @@ end
 
 jtframe_sysz80 #(
     .RAM_AW     ( 12        ),
-    .CLR_INT    ( 1         ),
+    .CLR_INT    ( 1         )
 ) u_cpu(
     .rst_n      ( rst_n     ),
-    .clk,       ( clk       )
-    .cen,       ( cpu_cen   )
+    .clk        ( clk       ),
+    .cen        ( cpu_cen   ),
     .cpu_cen    (           ),
     .int_n      ( int_n     ),
     .nmi_n      ( 1'b1      ),

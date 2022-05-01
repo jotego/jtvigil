@@ -6,4 +6,4 @@ if [ ! -e rom.bin ]; then
     ln -s $ROM/vigilant.rom rom.bin || exit $?
 fi
 
-jtsim -mist -sysname jtvigil $*
+jtsim -mist -sysname vigil $*

@@ -27,16 +27,18 @@ module jtvigil_video(
 
     output        LHBL,
     output        LVBL,
+    output        HS,
+    output        VS,
 
     input  [11:0] main_addr,
     input  [ 7:0] main_dout,
-    output [ 7:0] main_din,
     input         main_rnw,
-    input         scr1_cs,
 
     input  [ 8:0] scr1pos,
+    input         scr1_ramcs,
     output [16:0] scr1_addr,
     input  [31:0] scr1_data,
+    output [ 7:0] scr1_dout,
     output        scr1_cs,
     input         scr1_ok,
 
@@ -61,11 +63,11 @@ module jtvigil_video(
     output [ 4:0] blue,
 
     input  [ 3:0] gfx_en,
-    input  [ 3:0] debug_bus
+    input  [ 7:0] debug_bus
 );
 
 wire [8:0] h;
-wire [8:0] v;
+wire [8:0] v, vrender;
 wire [3:0] scr2_pxl;
 wire [7:0] scr1_pxl, obj_pxl;
 
@@ -103,12 +105,12 @@ jtframe_vtimer #(
 ) u_vtimer(
     .clk        ( clk       ),
     .pxl_cen    ( pxl_cen   ),
-    .vdump      ( vdump     ),
+    .vdump      ( v         ),
     .vrender    ( vrender   ),
-    .vrender1   ( vrender1  ),
-    .H          ( H         ),
-    .Hinit      ( Hinit     ),
-    .Vinit      ( Vinit     ),
+    .vrender1   (           ),
+    .H          ( h         ),
+    .Hinit      (           ),
+    .Vinit      (           ),
     .LHBL       ( LHBL      ),
     .LVBL       ( LVBL      ),
     .HS         ( HS        ),
@@ -120,11 +122,12 @@ jtvigil_scr1 u_scr1 (
     .clk      ( clk         ),
     .clk_cpu  ( clk_cpu     ),
     .pxl_cen  ( pxl_cen     ),
+    .flip     ( flip        ),
     .main_addr( main_addr   ),
     .main_dout( main_dout   ),
-    .main_din ( main_din    ),
+    .main_din ( scr1_dout   ),
     .main_rnw ( main_rnw    ),
-    .scr1_cs  ( scr1_cs     ),
+    .scr1_cs  ( scr1_ramcs  ),
     .h        ( h           ),
     .v        ( v           ),
     .scrpos   ( scr1pos     ),
@@ -139,6 +142,7 @@ jtvigil_scr2 u_scr2 (
     .rst        ( rst         ),
     .clk        ( clk         ),
     .pxl_cen    ( pxl_cen     ),
+    .flip       ( flip        ),
     .h          ( h           ),
     .v          ( v           ),
     .scrpos     ( scr2pos     ),
@@ -156,12 +160,12 @@ jtvigil_obj u_obj (
     .clk_cpu  ( clk_cpu        ),
     .pxl_cen  ( pxl_cen        ),
     .flip     ( flip           ),
-    .LHBL     ( LHBL_dly       ),
+    .LHBL     ( LHBL           ),
     .main_addr( main_addr[7:0] ),
     .main_dout( main_dout      ),
     .oram_cs  ( oram_cs        ),
     .h        ( h              ),
-    .v        ( v              ),
+    .v        ( vrender        ),
     .rom_addr ( obj_addr       ),
     .rom_data ( obj_data       ),
     .rom_cs   ( obj_cs         ),
@@ -176,7 +180,7 @@ jtvigil_colmix u_colmix (
     .pxl_cen  ( pxl_cen        ),
     .LHBL     ( LHBL           ),
     .LVBL     ( LVBL           ),
-    .main_addr( main_addr      ), // TODO: Check connection ! Signal/port not matching : Expecting logic [10:0]  -- Found logic [11:0]
+    .main_addr( main_addr[10:0]), // TODO: Check connection ! Signal/port not matching : Expecting logic [10:0]  -- Found logic [11:0]
     .main_dout( main_dout      ),
     .main_din ( pal_dout       ),
     .main_rnw ( main_rnw       ),

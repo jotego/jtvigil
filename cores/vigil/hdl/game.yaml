@@ -17,7 +17,7 @@ jtframe:
   - from: clocking
     get:
       - jtframe_cen24.v
-      - jtframe_cen96.v
+      - jtframe_cen48.v
   - from: ram
     get:
       - jtframe_obj_buffer.v
@@ -28,3 +28,9 @@ jtframe:
     get:
       - jtframe_dwnld.v
       - jtframe_sdram64.yaml
+  - from: video
+    get:
+      - jtframe_vtimer.v
+modules:
+  jt:
+    - name: jt51

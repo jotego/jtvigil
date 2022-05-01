@@ -32,7 +32,7 @@ module jtvigil_obj(
     input      [ 8:0] v,
     output reg [17:0] rom_addr,
     input      [31:0] rom_data,
-    output            rom_cs,
+    output reg        rom_cs,
     input             rom_ok,
     output     [ 7:0] pxl
 );

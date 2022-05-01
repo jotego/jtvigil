@@ -16,7 +16,7 @@
     Version: 1.0
     Date: 30-4-2022 */
 
-module JTVIGIL_sdram(
+module jtvigil_sdram(
     input           rst,
     input           clk,
 
@@ -40,19 +40,19 @@ module JTVIGIL_sdram(
 
     // Scroll layers
     input            scr1_cs,
-    input            scr1_ok,
+    output           scr1_ok,
     input    [16:0]  scr1_addr,
     output   [31:0]  scr1_data,
 
     input            scr2_cs,
-    input            scr2_ok,
+    output           scr2_ok,
     input    [17:0]  scr2_addr,
     output   [31:0]  scr2_data,
 
     // Obj
     output           obj_ok,
     input            obj_cs,
-    input    [18:0]  obj_addr,
+    input    [17:0]  obj_addr,
     output   [31:0]  obj_data,
 
     // Bank 0: allows R/W
@@ -85,7 +85,7 @@ module JTVIGIL_sdram(
     input            prog_rdy
 );
 
-/* _verilator lint_off WIDTH */
+/* verilator lint_off WIDTH */
 localparam [24:0] BA1_START   = `BA1_START,
                   BA2_START   = `BA2_START,
                   SCR2_START  = `SCR2_START,
@@ -93,6 +93,7 @@ localparam [24:0] BA1_START   = `BA1_START,
 
 localparam [21:0] PCM_OFFSET  = (`PCM_START-BA1_START)>>1,
                   SCR2_OFFSET = (`SCR2_START-BA2_START)>>1;
+/* verilator lint_on WIDTH */
 
 wire [21:0] pre_addr;
 wire        is_tiles, is_obj, prom_we;
@@ -105,9 +106,9 @@ always @* begin
     prog_addr = pre_addr;
     // moves the H address bit to the LSBs
     if( is_tiles )
-        prog_addr[3:0] ? { pre_addr[2:0], pre_addr[4] };
+        prog_addr[3:0] = { pre_addr[2:0], pre_addr[4] };
     if( is_obj )
-        prog_addr[5:0] ? { pre_addr[3:0], pre_addr[5:4] };
+        prog_addr[5:0] = { pre_addr[3:0], pre_addr[5:4] };
 end
 
 jtframe_dwnld #(
@@ -146,8 +147,7 @@ jtframe_rom_1slot #(
 
     // SDRAM controller interface
     .sdram_ack   ( ba_ack[0]  ),
-    .sdram_rd    ( ba_rd[0]   ),
-    .sdram_wr    ( ba_wr      ),
+    .sdram_req   ( ba_rd[0]   ),
     .sdram_addr  ( ba0_addr   ),
     .data_dst    ( ba_dst[0]  ),
     .data_rdy    ( ba_rdy[0]  ),
@@ -168,7 +168,7 @@ jtframe_rom_2slots #(
     .rst        ( rst       ),
     .clk        ( clk       ),
 
-    .slot0_addr ( snd_eff   ),
+    .slot0_addr ( snd_addr  ),
     .slot0_dout ( snd_data  ),
     .slot0_cs   ( snd_cs    ),
     .slot0_ok   ( snd_ok    ),
@@ -195,7 +195,7 @@ jtframe_rom_2slots #(
     .SLOT1_DW   (         32 ), // background images
     .SLOT1_AW   (         18 ),
 
-    .SLOT1_OFFSET(SCR2_OFFSET),
+    .SLOT1_OFFSET(SCR2_OFFSET)
 ) u_bank2(
     .rst        ( rst        ),
     .clk        ( clk        ),
@@ -223,7 +223,7 @@ jtframe_rom_2slots #(
 
 jtframe_rom_1slot #(
     .SLOT0_DW   (  32        ),
-    .SLOT0_AW   (  19        )
+    .SLOT0_AW   (  18        )
 ) u_bank3(
     .rst        ( rst        ),
     .clk        ( clk        ),
