@@ -20,6 +20,7 @@ module jtvigil_scr2(
     input         rst,
     input         clk,
     input         pxl_cen,
+    input         flip,
 
     input  [ 8:0] h,
     input  [ 8:0] v,

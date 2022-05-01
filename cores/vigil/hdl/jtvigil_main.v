@@ -30,7 +30,7 @@ module jtvigil_main(
     input              LVBL,
     input              dip_pause,
     // Sound
-    output  reg        latch_cs,
+    output  reg        latch_wr,
     // scroll
     output  reg [ 8:0] scr1pos,
     output  reg [10:0] scr2pos,
@@ -60,7 +60,7 @@ reg  [ 7:0] cpu_din;
 reg  [ 2:0] bank;
 reg         rst_n, ram_cs, dip1_cs, dip2_cs,
             in0_cs, in1_cs, in2_cs,
-            latch_cs, out2_cs, bank_cs,
+            out2_cs, bank_cs,
             scr1pos_cs, scr2pos_cs, scr2col_cs;
 reg         flipr;
 wire        rd_n, wr_n, mreq_n, iorq_n;
@@ -86,7 +86,7 @@ always @* begin
     dip1_cs = !iorq_n && !rd_n && A[2:0]==3;
     dip2_cs = !iorq_n && !rd_n && A[2:0]==4;
 
-    latch_cs = !iorq_n && !wr_n && A[2:0]==0;
+    latch_wr = !iorq_n && !wr_n && A[2:0]==0;
     out2_cs  = !iorq_n && !wr_n && A[2:0]==1;
     bank_cs  = !iorq_n && !wr_n && A[2:0]==4;
     scr1pos_cs = !iorq_n && !wr_n && A[7] && A[2:1]==0;

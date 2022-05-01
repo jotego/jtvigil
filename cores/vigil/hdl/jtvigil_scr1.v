@@ -21,6 +21,7 @@ module jtvigil_scr1(
     input         clk,
     input         clk_cpu,
     input         pxl_cen,
+    input         flip,
 
     input  [11:0] main_addr,
     input  [ 7:0] main_dout,
@@ -31,7 +32,7 @@ module jtvigil_scr1(
     input  [ 8:0] h,
     input  [ 8:0] v,
     input  [ 8:0] scrpos,
-    output [17:0] rom_addr,
+    output [16:0] rom_addr,
     input  [31:0] rom_data, // 32/4 = 8 pixels
     output        rom_cs,
     input         rom_ok,
@@ -48,13 +49,13 @@ wire [11:0] scan_addr;
 wire [ 7:0] scan_dout;
 reg  [ 7:0] pre_code, code, attr;
 
-assign ram_we   = main_cs & ~main_rnw;
+assign ram_we   = scr1_cs & ~main_rnw;
 assign rom_cs   = 1;
-assign rom_addr = { attr[3:0], code, v[2:0], 1'b0 };
+assign rom_addr = { attr[3:0], code, v[2:0], 2'b0 };
 assign pxl = { pal, flip ?
-    { pxl_pair[7], pxl_pair[5], pxl_pair[3], pxl_pair[1] } :
-    { pxl_pair[6], pxl_pair[4], pxl_pair[2], pxl_pair[0] } };
-assign scan_addr = { v[8], v[6:4], hsum[8], hsum[0], hsum[7:3] };
+    { pxl_data[7], pxl_data[5], pxl_data[3], pxl_data[1] } :
+    { pxl_data[6], pxl_data[4], pxl_data[2], pxl_data[0] } };
+assign scan_addr = { v[8], v[6:3], hsum[8], hsum[0], hsum[7:3] };
 
 jtframe_dual_ram #(.aw(12)) u_vram(
     // CPU

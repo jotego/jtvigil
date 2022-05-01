@@ -87,19 +87,22 @@ module jtvigil_game(
     output  [7:0]   debug_view
 );
 
+wire        cpu_cen, fm_cen;
 // video signals
 wire        LVBL, LHBL;
 
 // SDRAM interface
-wire        main_cs, scr1_cs, scr2_cs, obj_cs, adpcm_cs;
-wire [17:0] main_addr;
-wire [ 7:0] main_data, snd_data, adpcm_data;
+wire        main_cs, scr1_cs, scr2_cs, obj_cs, pcm_cs;
+wire [17:0] main_addr, scr2_addr;
+wire [15:0] pcm_addr, snd_addr;
+wire [16:0] scr1_addr;
+wire [ 7:0] main_data, snd_data, pcm_data;
 wire [31:0] scr1_data, scr2_data, obj_data;
 wire        main_ok, scr1_ok, scr2_ok, obj_ok, adpck_ok;
 
 // CPU interface
 wire [ 7:0] main_dout, pal_dout, obj_dout;
-wire        main_rnw;
+wire        main_rnw, latch_wr;
 
 // Scroll configuration
 wire [10:0] scr1pos, scr2pos;
@@ -115,7 +118,7 @@ assign dip_flip = ~flip;
 jtframe_cen3p57 #(.CLK24(1)) u_cencpu(
     .clk        ( clk24     ),
     .cen_3p57   ( cpu_cen   ),
-    .cen_1p78   (           )
+    .cen_1p78   ( fm_cen    )
 );
 
 jtvigil_main u_main(
@@ -169,7 +172,7 @@ jtvigil_video u_video(
     .cpu_addr   ( main_addr[12:0]  ),
     .cpu_dout   ( main_dout ),
     .cpu_rnw    ( main_rnw  ),
-
+    .latch_wr   ( latch_wr  ),  // sound
     // Scroll
     .scr1_cs    ( scr1_cs   ),
     .scr1_ok    ( scr1_ok   ),
@@ -217,11 +220,11 @@ jtvigil_video u_video(
         .rst        ( rst24     ),
         .clk        ( clk24     ),
         .cpu_cen    ( cpu_cen   ),
+        .fm_cen     ( fm_cen    ),
 
         // From main CPU
-        .snreq      ( snreq     ),
-        .latch      ( snd_latch ),
-        .snd_bank   ( snd_bank  ),
+        .main_dout  ( main_dout ),
+        .latch_wr   ( latch_wr  ),
 
         // ROM
         .rom_addr   ( snd_addr  ),
@@ -229,11 +232,11 @@ jtvigil_video u_video(
         .rom_data   ( snd_data  ),
         .rom_ok     ( snd_ok    ),
 
-        // ADPCM ROM
-        .adpcm_addr ( adpcm_addr),
-        .adpcm_cs   ( adpcm_cs  ),
-        .adpcm_data ( adpcm_data),
-        .adpcm_ok   ( adpcm_ok  ),
+        // PCM ROM
+        .pcm_addr   ( pcm_addr  ),
+        .pcm_cs     ( pcm_cs    ),
+        .pcm_data   ( pcm_data  ),
+        .pcm_ok     ( pcm_ok    ),
 
         .snd        ( snd       ),
         .sample     ( sample    ),
@@ -241,7 +244,7 @@ jtvigil_video u_video(
     );
 `else
     assign snd_cs   = 0;
-    assign adpcm_cs = 0;
+    assign pcm_cs = 0;
     assign snd      = 0;
     assign game_led = 0;
 `endif
@@ -262,11 +265,11 @@ jtvigil_sdram u_sdram(
     .snd_data   ( snd_data  ),
     .snd_ok     ( snd_ok    ),
 
-    // ADPCM ROM
-    .adpcm_addr (adpcm_addr ),
-    .adpcm_cs   (adpcm_cs   ),
-    .adpcm_data (adpcm_data ),
-    .adpcm_ok   (adpcm_ok   ),
+    // PCM ROM
+    .pcm_addr (pcm_addr ),
+    .pcm_cs   (pcm_cs   ),
+    .pcm_data (pcm_data ),
+    .pcm_ok   (pcm_ok   ),
 
     // Scroll
     .scr1_cs    ( scr1_cs   ),

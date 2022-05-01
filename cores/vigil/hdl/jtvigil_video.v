@@ -33,7 +33,7 @@ module jtvigil_video(
     input         scr1_cs,
 
     input  [ 8:0] scr1pos,
-    output [17:0] scr1_addr,
+    output [16:0] scr1_addr,
     input  [31:0] scr1_data,
     output        scr1_cs,
     input         scr1_ok,
@@ -118,7 +118,6 @@ jtvigil_scr1 u_scr1 (
     .rom_ok   ( scr1_ok     ),
     .pxl      ( scr1_pxl    )
 );
-
 
 jtvigil_scr2 u_scr2 (
     .rst        ( rst         ),

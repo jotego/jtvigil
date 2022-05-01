@@ -32,16 +32,16 @@ module JTVIGIL_sdram(
     input     [15:0] snd_addr,
     output    [ 7:0] snd_data,
 
-    // ADPCM ROM
-    input     [15:0] adpcm_addr,
-    input            adpcm_cs,
-    output    [ 7:0] adpcm_data,
-    output           adpcm_ok,
+    // PCM ROM
+    input     [15:0] pcm_addr,
+    input            pcm_cs,
+    output    [ 7:0] pcm_data,
+    output           pcm_ok,
 
     // Scroll layers
     input            scr1_cs,
     input            scr1_ok,
-    input    [17:0]  scr1_addr,
+    input    [16:0]  scr1_addr,
     output   [31:0]  scr1_data,
 
     input            scr2_cs,
@@ -94,9 +94,17 @@ localparam [24:0] BA1_START   = `BA1_START,
 localparam [21:0] PCM_OFFSET  = (`PCM_START-BA1_START)>>1,
                   SCR2_OFFSET = (`SCR2_START-BA2_START)>>1;
 
-localparam [ 1:0] HIPPODROME  = 2'd1;
+wire [21:0] pre_addr;
+wire        is_tiles;
 
 assign dwnld_busy = downloading;
+assign is_tiles   = prog_ba==2 && ioctl_addr<SCR2_START;
+
+always @* begin
+    prog_addr = pre_addr;
+    if( is_tiles )
+        prog_addr[3:0] ? { pre_addr[2:0], pre_addr[4] };
+end
 
 jtframe_dwnld #(
     .BA1_START ( BA1_START ), // sound
@@ -109,7 +117,7 @@ jtframe_dwnld #(
     .ioctl_addr   ( ioctl_addr     ),
     .ioctl_dout   ( ioctl_dout     ),
     .ioctl_wr     ( ioctl_wr       ),
-    .prog_addr    ( prog_addr      ),
+    .prog_addr    ( pre_addr       ),
     .prog_data    ( prog_data      ),
     .prog_mask    ( prog_mask      ), // active low
     .prog_we      ( prog_we        ),
@@ -161,10 +169,10 @@ jtframe_rom_2slots #(
     .slot0_cs   ( snd_cs    ),
     .slot0_ok   ( snd_ok    ),
 
-    .slot1_addr (adpcm_addr ),
-    .slot1_dout (adpcm_data ),
-    .slot1_cs   (adpcm_cs   ),
-    .slot1_ok   (adpcm_ok   ),
+    .slot1_addr (pcm_addr ),
+    .slot1_dout (pcm_data ),
+    .slot1_cs   (pcm_cs   ),
+    .slot1_ok   (pcm_ok   ),
 
     // SDRAM controller interface
     .sdram_addr ( ba1_addr  ),
@@ -179,7 +187,7 @@ jtframe_rom_2slots #(
 
 jtframe_rom_2slots #(
     .SLOT0_DW   (         32 ), // Tiles
-    .SLOT0_AW   (         18 ),
+    .SLOT0_AW   (         17 ),
     .SLOT1_DW   (         32 ), // background images
     .SLOT1_AW   (         18 ),
 
