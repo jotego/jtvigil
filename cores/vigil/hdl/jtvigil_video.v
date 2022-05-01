@@ -41,6 +41,7 @@ module jtvigil_video(
     input         scr1_ok,
 
     input  [10:0] scr2pos,
+    input  [ 2:0] scr2col,
     output [17:0] scr2_addr,
     input  [31:0] scr2_data,
     output        scr2_cs,
@@ -51,6 +52,9 @@ module jtvigil_video(
     input  [31:0] obj_data,
     output        obj_cs,
     input         obj_ok,
+
+    input         pal_cs,
+    output [ 7:0] pal_dout,
 
     output [ 4:0] red,
     output [ 4:0] green,
@@ -174,11 +178,11 @@ jtvigil_colmix u_colmix (
     .LVBL     ( LVBL           ),
     .main_addr( main_addr      ), // TODO: Check connection ! Signal/port not matching : Expecting logic [10:0]  -- Found logic [11:0]
     .main_dout( main_dout      ),
-    .main_din ( main_din       ),
+    .main_din ( pal_dout       ),
     .main_rnw ( main_rnw       ),
     .pal_cs   ( pal_cs         ),
     .scr1_pxl ( scr1_pxl       ),
-    .scr2_pal ( scr2_pal       ),
+    .scr2col  ( scr2col        ),
     .scr2_pxl ( scr2_pxl       ),
     .obj_pxl  ( obj_pxl        ),
     .gfx_en   ( gfx_en         ),

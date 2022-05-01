@@ -105,7 +105,8 @@ wire [ 7:0] main_dout, pal_dout, obj_dout;
 wire        main_rnw, latch_wr;
 
 // Scroll configuration
-wire [10:0] scr1pos, scr2pos;
+wire [ 8:0] scr1pos;
+wire [10:0] scr2pos;
 wire [ 2:0] scr2col;
 
 // Cabinet inputs
@@ -122,28 +123,26 @@ jtframe_cen3p57 #(.CLK24(1)) u_cencpu(
 );
 
 jtvigil_main u_main(
-    .rst        ( rst24     ),
-    .clk        ( clk24     ),
+    .rst         ( rst24      ),
+    .clk         ( clk24      ),
     // Video
-    .LVBL       ( LVBL      ),
+    .LVBL        ( LVBL       ),
     // Sound communication
-    .latch_cs   ( snd_latch ),
+    .latch_wr    ( snd_latch  ),
     // Palette
-    .pal_cs     ( pal_cs    ),
-    .pal_dout   ( pal_dout  ),
+    .pal_cs      ( pal_cs     ),
+    .pal_dout    ( pal_dout   ),
     // Video circuitry
-
+    .scr1pos     ( scr1pos    ),
+    .scr2pos     ( scr2pos    ),
+    .scr2col     ( scr2col    ),
     // Objects
-    .obj_cs     ( objram_cs ),
-    .obj_copy   ( obj_copy  ),
-    .obj_dout   ( obj_dout  ),
+    .oram_cs     ( oram_cs    ),
 
     // CPU bus
-    .cpu_addr   ( main_addr ),
-    .cpu_dout   ( main_dout ),
-    .UDSWn      ( UDSWn     ),
-    .LDSWn      ( LDSWn     ),
-    .RnW        ( main_rnw  ),
+    .cpu_addr    ( main_addr  ),
+    .cpu_dout    ( main_dout  ),
+    .main_rnw    ( main_rnw   ),
     // cabinet I/O
     .joystick1   ( joystick1  ),
     .joystick2   ( joystick2  ),
@@ -166,10 +165,9 @@ jtvigil_video u_video(
     .clk_cpu    ( clk24     ),
     .pxl2_cen   ( pxl2_cen  ),
     .pxl_cen    ( pxl_cen   ),
-    .gfx_en     ( gfx_en    ),
 
     // CPU interface
-    .cpu_addr   ( main_addr[12:0]  ),
+    .cpu_addr   ( main_addr[11:0] ),
     .cpu_dout   ( main_dout ),
     .cpu_rnw    ( main_rnw  ),
     .latch_wr   ( latch_wr  ),  // sound
@@ -186,9 +184,7 @@ jtvigil_video u_video(
     .scr2_data  ( scr2_data ),
 
     // Object
-    .objram_cs  ( objram_cs ),
-    .obj_dout   ( obj_dout  ),
-    .obj_copy   ( obj_copy  ),
+    .oram_cs    ( oram_cs   ),
 
     // Palette
     .pal_cs     ( pal_cs    ),
@@ -197,21 +193,20 @@ jtvigil_video u_video(
 
     // SDRAM interface
 
-    .orom_ok     ( obj_ok     ),
-    .orom_cs     ( obj_cs     ),
-    .orom_addr   ( obj_addr   ),
-    .orom_data   ( obj_data   ),
+    .obj_ok     ( obj_ok    ),
+    .obj_cs     ( obj_cs    ),
+    .obj_addr   ( obj_addr  ),
+    .obj_data   ( obj_data  ),
 
     // Video signal
     .HS         ( HS        ),
     .VS         ( VS        ),
     .LVBL       ( LVBL      ),
     .LHBL       ( LHBL      ),
-    .LHBL_dly   ( LHBL_dly  ),
-    .LVBL_dly   ( LVBL_dly  ),
     .red        ( red       ),
     .green      ( green     ),
     .blue       ( blue      ),
+    .gfx_en     ( gfx_en    ),
     .debug_bus  ( debug_bus )
 );
 
