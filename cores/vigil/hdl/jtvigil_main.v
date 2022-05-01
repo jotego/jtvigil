@@ -78,7 +78,7 @@ always @* begin
     ram_cs  = !mreq_n && A[15:12]==4'he;
     scr_cs  = !mreq_n && A[15:12]==4'hd;
     pal_cs  = !mreq_n && A[15:11]==5'b11001; // C8
-    obj_cs  = !mreq_n && A[15:11]==5'b11000; // C0 - to check
+    obj_cs  = !mreq_n && A[15:11]==5'b11000 && !wr_n; // C0
     // IO mapped
     in0_cs  = !iorq_n && !rd_n && A[2:0]==0;
     in1_cs  = !iorq_n && !rd_n && A[2:0]==1;
