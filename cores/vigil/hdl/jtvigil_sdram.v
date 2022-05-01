@@ -95,15 +95,19 @@ localparam [21:0] PCM_OFFSET  = (`PCM_START-BA1_START)>>1,
                   SCR2_OFFSET = (`SCR2_START-BA2_START)>>1;
 
 wire [21:0] pre_addr;
-wire        is_tiles;
+wire        is_tiles, is_obj, prom_we;
 
 assign dwnld_busy = downloading;
 assign is_tiles   = prog_ba==2 && ioctl_addr<SCR2_START;
+assign is_obj     = prog_ba==3 && !prom_we;
 
 always @* begin
     prog_addr = pre_addr;
+    // moves the H address bit to the LSBs
     if( is_tiles )
         prog_addr[3:0] ? { pre_addr[2:0], pre_addr[4] };
+    if( is_obj )
+        prog_addr[5:0] ? { pre_addr[3:0], pre_addr[5:4] };
 end
 
 jtframe_dwnld #(
