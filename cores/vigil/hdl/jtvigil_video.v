@@ -25,17 +25,34 @@ module jtvigil_video(
     output        LHBL_dly,
     output        LVBL_dly,
     output        LVBL,
+
+    input  [11:0] main_addr,
+    input  [ 7:0] main_dout,
+    output [ 7:0] main_din,
+    input         main_rnw,
+    input         scr1_cs,
+
+    input  [ 8:0] scr1pos,
     output [17:0] scr1_addr,
     input  [31:0] scr1_data,
-    input         scr1_cs,
+    output        scr1_cs,
     input         scr1_ok,
+
+    input  [10:0] scr2pos,
     output [17:0] scr2_addr,
     input  [31:0] scr2_data,
-    input         scr2_cs,
+    output        scr2_cs,
     input         scr2_ok,
+
     input  [ 3:0] gfx_en,
     input  [ 3:0] debug_bus
 );
+
+wire [8:0] h;
+wire [8:0] v;
+wire [3:0] scr2_pxl;
+wire [7:0] scr1_pxl;
+
 
 jtframe_cen48 u_cen48(
     .clk    ( clk      ),    // 48 MHz
@@ -81,5 +98,41 @@ jtframe_vtimer #(
     .HS         ( HS        ),
     .VS         ( VS        )
 );
+
+jtvigil_scr1 u_scr1 (
+    .rst      ( rst         ),
+    .clk      ( clk         ),
+    .clk_cpu  ( clk_cpu     ),
+    .pxl_cen  ( pxl_cen     ),
+    .main_addr( main_addr   ),
+    .main_dout( main_dout   ),
+    .main_din ( main_din    ),
+    .main_rnw ( main_rnw    ),
+    .scr1_cs  ( scr1_cs     ),
+    .h        ( h           ),
+    .v        ( v           ),
+    .scrpos   ( scr1pos     ),
+    .rom_addr ( scr1_addr   ),
+    .rom_data ( scr1_data   ),
+    .rom_cs   ( scr1_cs     ),
+    .rom_ok   ( scr1_ok     ),
+    .pxl      ( scr1_pxl    )
+);
+
+
+jtvigil_scr2 u_scr2 (
+    .rst        ( rst         ),
+    .clk        ( clk         ),
+    .pxl_cen    ( pxl_cen     ),
+    .h          ( h           ),
+    .v          ( v           ),
+    .scrpos     ( scr2pos     ),
+    .rom_addr   ( scr2_addr   ),
+    .rom_data   ( scr2_data   ),
+    .rom_cs     ( scr2_cs     ),
+    .rom_ok     ( scr2_ok     ),
+    .pxl        ( scr2_pxl    )
+);
+
 
 endmodule

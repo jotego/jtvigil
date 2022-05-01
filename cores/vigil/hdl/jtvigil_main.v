@@ -32,7 +32,7 @@ module jtvigil_main(
     // Sound
     output  reg        latch_cs,
     // scroll
-    output  reg [10:0] scr1pos,
+    output  reg [ 8:0] scr1pos,
     output  reg [10:0] scr2pos,
     output  reg [ 2:0] scr2col,
     // Object
