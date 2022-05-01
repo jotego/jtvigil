@@ -20,10 +20,12 @@ module jtvigil_video(
     input         rst,
     input         clk,
     input         clk_cpu,
+
+    input         flip,
     output        pxl_cen,
     output        pxl2_cen,
-    output        LHBL_dly,
-    output        LVBL_dly,
+
+    output        LHBL,
     output        LVBL,
 
     input  [11:0] main_addr,
@@ -44,6 +46,16 @@ module jtvigil_video(
     output        scr2_cs,
     input         scr2_ok,
 
+    input         oram_cs,
+    output [17:0] obj_addr,
+    input  [31:0] obj_data,
+    output        obj_cs,
+    input         obj_ok,
+
+    output [ 4:0] red,
+    output [ 4:0] green,
+    output [ 4:0] blue,
+
     input  [ 3:0] gfx_en,
     input  [ 3:0] debug_bus
 );
@@ -51,7 +63,7 @@ module jtvigil_video(
 wire [8:0] h;
 wire [8:0] v;
 wire [3:0] scr2_pxl;
-wire [7:0] scr1_pxl;
+wire [7:0] scr1_pxl, obj_pxl;
 
 
 jtframe_cen48 u_cen48(
@@ -131,6 +143,48 @@ jtvigil_scr2 u_scr2 (
     .rom_cs     ( scr2_cs     ),
     .rom_ok     ( scr2_ok     ),
     .pxl        ( scr2_pxl    )
+);
+
+
+jtvigil_obj u_obj (
+    .rst      ( rst            ),
+    .clk      ( clk            ),
+    .clk_cpu  ( clk_cpu        ),
+    .pxl_cen  ( pxl_cen        ),
+    .flip     ( flip           ),
+    .LHBL     ( LHBL_dly       ),
+    .main_addr( main_addr[7:0] ),
+    .main_dout( main_dout      ),
+    .oram_cs  ( oram_cs        ),
+    .h        ( h              ),
+    .v        ( v              ),
+    .rom_addr ( obj_addr       ),
+    .rom_data ( obj_data       ),
+    .rom_cs   ( obj_cs         ),
+    .rom_ok   ( obj_ok         ),
+    .pxl      ( obj_pxl        )
+);
+
+jtvigil_colmix u_colmix (
+    .rst      ( rst            ),
+    .clk      ( clk            ),
+    .clk_cpu  ( clk_cpu        ),
+    .pxl_cen  ( pxl_cen        ),
+    .LHBL     ( LHBL           ),
+    .LVBL     ( LVBL           ),
+    .main_addr( main_addr      ), // TODO: Check connection ! Signal/port not matching : Expecting logic [10:0]  -- Found logic [11:0]
+    .main_dout( main_dout      ),
+    .main_din ( main_din       ),
+    .main_rnw ( main_rnw       ),
+    .pal_cs   ( pal_cs         ),
+    .scr1_pxl ( scr1_pxl       ),
+    .scr2_pal ( scr2_pal       ),
+    .scr2_pxl ( scr2_pxl       ),
+    .obj_pxl  ( obj_pxl        ),
+    .gfx_en   ( gfx_en         ),
+    .red      ( red            ),
+    .green    ( green          ),
+    .blue     ( blue           )
 );
 
 
