@@ -21,6 +21,7 @@ module jtvigil_snd(
     input                rst,
     input                cpu_cen,
     input                fm_cen,
+    input                v1,
 
     // From main
     input         [ 7:0] main_dout,
@@ -53,7 +54,7 @@ reg         rst_n, ram_cs,  cntcs_l,
             fm_cs, latch_cs, irq_clr,
             hi_cs, lo_cs, cnt_cs, pcm_rd;
 wire        rd_n, wr_n, mreq_n, iorq_n;
-reg         int_n;
+reg         main_intn;
 wire        fm_intn;
 
 wire signed [15:0] left, right;
@@ -65,30 +66,33 @@ always @(posedge clk) rst_n <= ~rst;
 
 always @* begin
     // Memory mapped
-    rom_cs  = !mreq_n && A[15:14]<2'b10;
+    rom_cs  = !mreq_n && A[15:14]<=2'b10;
     ram_cs  = !mreq_n && A[15:12]==4'hf;
-    // IO mapped
-    fm_cs   = !iorq_n && !rd_n && !A[7];
-    latch_cs= !iorq_n && !rd_n &&  A[7] && A[2:0]==0;
-    irq_clr = !iorq_n && !rd_n &&  A[7] && A[2:0]==3;
-    // PCM control
+    // IO mapped R/W
+    fm_cs   = !iorq_n && !A[7];
+    // IO mapped reads
+    latch_cs= !iorq_n && !rd_n &&  A[7] && !A[2];
+    pcm_rd  = !iorq_n && !rd_n &&  A[7] &&  A[2]; // labeled ~SROMC
+    // IO mapped writes
     lo_cs   = !iorq_n && !wr_n &&  A[7] && A[2:0]==0;
     hi_cs   = !iorq_n && !wr_n &&  A[7] && A[2:0]==1;
     cnt_cs  = !iorq_n && !wr_n &&  A[7] && A[2:0]==2;
-    pcm_rd  = !iorq_n && !rd_n &&  A[7] && A[2:0]==4;
+    irq_clr = !iorq_n && !wr_n &&  A[7] && A[2:0]==3;
 end
 
 // latch from main CPU
+wire int_n = main_intn & fm_intn;
+
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
         latch <= 0;
-        int_n <= 1;
+        main_intn <= 1;
     end else begin
         if( latch_wr ) begin
             latch <= main_dout;
-            int_n <= 0;
+            main_intn <= 0;
         end
-        if( irq_clr ) int_n <= 1;
+        if( irq_clr ) main_intn <= 1;
     end
 end
 
@@ -119,17 +123,16 @@ always @(posedge clk, posedge rst) begin
 end
 
 jtframe_sysz80 #(
-    .RAM_AW     ( 12        ),
-    .CLR_INT    ( 1         )
+    .RAM_AW     ( 12        )
 ) u_cpu(
     .rst_n      ( rst_n     ),
     .clk        ( clk       ),
     .cen        ( cpu_cen   ),
     .cpu_cen    (           ),
     .int_n      ( int_n     ),
-    .nmi_n      ( 1'b1      ),
+    .nmi_n      ( ~v1       ),
     .busrq_n    ( 1'b1      ),
-    .m1_n       ( fm_intn   ),
+    .m1_n       (           ),
     .mreq_n     ( mreq_n    ),
     .iorq_n     ( iorq_n    ),
     .rd_n       ( rd_n      ),
@@ -183,6 +186,5 @@ jtframe_mixer #(.W2(8)) u_mixer (
     .mixed ( snd        ),
     .peak  ( peak       )
 );
-
 
 endmodule

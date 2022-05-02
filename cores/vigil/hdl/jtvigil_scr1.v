@@ -40,7 +40,7 @@ module jtvigil_scr1(
     output [ 7:0] pxl
 );
 
-localparam SCORE_ROW = 6;
+localparam SCORE_ROW = 6; // 6*8 = 48,  256-48=208
 
 reg  [ 9:0] hsum;
 reg  [31:0] pxl_data;
@@ -54,11 +54,11 @@ reg  [ 7:0] pre_code, code, attr;
 
 assign ram_we   = scr1_cs & ~main_rnw;
 assign rom_cs   = 1;
-assign rom_addr = { 1'b0, attr[7:4], code, v[2:0], 1'b0 };
+assign rom_addr = { debug_bus[7], attr[7:4], code, v[2:0], 1'b0 };
 assign pxl = { pal, flip ?
     {pxl_data[31], pxl_data[23], pxl_data[15], pxl_data[7] } :
     {pxl_data[24], pxl_data[16], pxl_data[ 8], pxl_data[0] } };
-assign scan_addr = { v[7:3], hsum[8:3]^debug_bus[7:2], hsum[0] };
+assign scan_addr = { v[7:3], hsum[8:3], hsum[0] };
 
 jtframe_dual_ram #(.aw(12)) u_vram(
     // CPU
@@ -82,7 +82,6 @@ always @(posedge clk, posedge rst) begin
         hsum     <= { 1'b0, h[8:0] } +
             (v[7:3] >= SCORE_ROW ? { 1'b0, scrpos } : 10'd0)
             + 10'h7f;
-            //+ { 1'b0, debug_bus[7], debug_bus };
         case( hsum[2:0] )
             0: pre_code <= scan_dout;
             1: begin

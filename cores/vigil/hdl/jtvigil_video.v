@@ -29,6 +29,7 @@ module jtvigil_video(
     output        LVBL,
     output        HS,
     output        VS,
+    output        v1,
 
     input  [11:0] main_addr,
     input  [ 7:0] main_dout,
@@ -72,6 +73,7 @@ wire [8:0] v, vrender;
 wire [3:0] scr2_pxl;
 wire [7:0] scr1_pxl, obj_pxl;
 
+assign v1 = v[0];
 
 jtframe_cen48 u_cen48(
     .clk    ( clk      ),    // 48 MHz
@@ -99,8 +101,9 @@ jtframe_vtimer #(
     .VB_START ( 9'd255          ),
     .VB_END   ( 9'd279          ),
     .VS_START ( 9'd260          ),
-    .HB_END   ( 9'd383          ),
-    .HB_START ( 9'd255          ),
+    .HB_END   ( 9'd7            ),
+    .HB_START ( 9'd263          ),
+    .HCNT_END ( 9'd383          ),
     .HS_START ( 9'd304          ),
     .HS_END   ( 9'd336          )
 ) u_vtimer(

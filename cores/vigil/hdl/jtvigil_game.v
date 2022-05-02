@@ -93,7 +93,7 @@ module jtvigil_game(
 
 wire        cpu_cen, fm_cen;
 // video signals
-wire        LVBL, LHBL;
+wire        LVBL, LHBL, v1;
 
 // SDRAM interface
 wire        main_cs, scr1_cs, scr2_cs, obj_cs, pcm_cs, snd_cs;
@@ -194,6 +194,7 @@ jtvigil_video u_video(
     .clk_cpu    ( clk24     ),
     .pxl2_cen   ( pxl2_cen  ),
     .pxl_cen    ( pxl_cen   ),
+    .v1         ( v1        ),
 
     // CPU interface
     .main_addr  ( main_addr[11:0] ),
@@ -249,6 +250,7 @@ jtvigil_video u_video(
         .clk        ( clk24     ),
         .cpu_cen    ( cpu_cen   ),
         .fm_cen     ( fm_cen    ),
+        .v1         ( v1        ),
 
         // From main CPU
         .main_dout  ( main_dout ),
