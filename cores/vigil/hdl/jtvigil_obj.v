@@ -198,7 +198,7 @@ jtframe_dual_ram #(.aw(8)) u_vram(
     .q1   ( scan_dout )
 );
 
-jtframe_obj_buffer u_obj_buffer (
+jtframe_obj_buffer #(.ALPHA(0)) u_obj_buffer (
     .clk     ( clk         ),
     .LHBL    ( LHBL        ),
     .flip    ( flip        ),

@@ -90,12 +90,12 @@ always @* begin
     dip1_cs = !iorq_n && !rd_n && A[2:0]==3;
     dip2_cs = !iorq_n && !rd_n && A[2:0]==4;
 
-    latch_wr = !iorq_n && !wr_n && A[2:0]==0;
-    out2_cs  = !iorq_n && !wr_n && A[2:0]==1;
-    bank_cs  = !iorq_n && !wr_n && A[2:0]==4;
-    scr1pos_cs = !iorq_n && !wr_n && A[7] && A[2:1]==0;
-    scr2pos_cs = !iorq_n && !wr_n && A[7] && A[2:1]==1;
-    scr2col_cs = !iorq_n && !wr_n && A[7] && A[2:0]==4;
+    latch_wr   = !iorq_n && !wr_n && !A[7] && A[2:0]==0;
+    out2_cs    = !iorq_n && !wr_n && !A[7] && A[2:0]==1;
+    bank_cs    = !iorq_n && !wr_n && !A[7] && A[2:0]==4;
+    scr1pos_cs = !iorq_n && !wr_n &&  A[7] && A[2:1]==0;
+    scr2pos_cs = !iorq_n && !wr_n &&  A[7] && A[2:1]==1;
+    scr2col_cs = !iorq_n && !wr_n &&  A[7] && A[2:0]==4;
 end
 
 always @(posedge clk, posedge rst) begin

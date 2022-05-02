@@ -24,7 +24,7 @@
     <name>Vigilante (US, Rev G)</name>
     <setname>vigilantg</setname>
     <rbf>jtvigil</rbf>
-    <mameversion>0237</mameversion>
+    <mameversion>0232</mameversion>
     <year>1988</year>
     <manufacturer>Irem (Data East license)</manufacturer>
     <players>2</players>
@@ -43,8 +43,8 @@
         <part name="vg_a-4d-.ic26" crc="9b85101d"/>
         <!-- gfx1 - starts at 0x40000 -->
         <interleave output="16">
-            <part name="vg_b-4f-.ic34" crc="01579d20" map="01"/>
-            <part name="vg_b-4j-.ic35" crc="4f5872f0" map="10"/>
+            <part name="vg_b-4j-.ic35" crc="4f5872f0" map="01"/>
+            <part name="vg_b-4f-.ic34" crc="01579d20" map="10"/>
         </interleave>
         <part repeat="0x20000"> FF</part>
         <!-- gfx3 - starts at 0x80000 -->

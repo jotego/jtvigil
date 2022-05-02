@@ -36,8 +36,11 @@ module jtvigil_scr1(
     input  [31:0] rom_data, // 32/4 = 8 pixels
     output        rom_cs,
     input         rom_ok,
+    input  [ 7:0] debug_bus,
     output [ 7:0] pxl
 );
+
+localparam SCORE_ROW = 6;
 
 reg  [ 9:0] hsum;
 reg  [31:0] pxl_data;
@@ -51,11 +54,11 @@ reg  [ 7:0] pre_code, code, attr;
 
 assign ram_we   = scr1_cs & ~main_rnw;
 assign rom_cs   = 1;
-assign rom_addr = { attr[3:0], code, v[2:0], 2'b0 };
+assign rom_addr = { 1'b0, attr[7:4], code, v[2:0], 1'b0 };
 assign pxl = { pal, flip ?
-    { pxl_data[7], pxl_data[5], pxl_data[3], pxl_data[1] } :
-    { pxl_data[6], pxl_data[4], pxl_data[2], pxl_data[0] } };
-assign scan_addr = { v[8], v[6:3], hsum[8], hsum[0], hsum[7:3] };
+    {pxl_data[31], pxl_data[23], pxl_data[15], pxl_data[7] } :
+    {pxl_data[24], pxl_data[16], pxl_data[ 8], pxl_data[0] } };
+assign scan_addr = { v[7:3], hsum[8:3]^debug_bus[7:2], hsum[0] };
 
 jtframe_dual_ram #(.aw(12)) u_vram(
     // CPU
@@ -76,7 +79,10 @@ always @(posedge clk, posedge rst) begin
     if( rst ) begin
         hsum     <= 0;
     end else if(pxl_cen) begin
-        hsum     <= { 1'd0, h } + scrpos;
+        hsum     <= { 1'b0, h[8:0] } +
+            (v[7:3] >= SCORE_ROW ? { 1'b0, scrpos } : 10'd0)
+            + 10'h7f;
+            //+ { 1'b0, debug_bus[7], debug_bus };
         case( hsum[2:0] )
             0: pre_code <= scan_dout;
             1: begin
@@ -89,13 +95,17 @@ end
 
 always @(posedge clk) if(pxl_cen) begin
     case( hsum[2:0] )   // 8 pixel delay
-        0: begin
-            pxl_data <= flip ? {rom_data[15:0], rom_data[31:16]} : rom_data;
-            pal      <= attr[7:4];
+        7: begin
+            pxl_data <= {
+                rom_data[15:12], rom_data[31:28],
+                rom_data[11: 8], rom_data[27:24],
+                rom_data[ 7: 4], rom_data[23:20],
+                rom_data[ 3: 0], rom_data[19:16]
+            };
+            pal <= attr[3:0];
         end
-        4: pxl_data[15:0] <= pxl_data[31:16];
         default: begin
-            pxl_data[15:0] <= flip ? pxl_data[15:0] << 1 : pxl_data[15:0] >> 1;
+            pxl_data <= flip ? pxl_data << 1 : pxl_data >> 1;
         end
     endcase
 end

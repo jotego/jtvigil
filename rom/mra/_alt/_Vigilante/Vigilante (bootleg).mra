@@ -24,7 +24,7 @@
     <name>Vigilante (bootleg)</name>
     <setname>vigilantbl</setname>
     <rbf>jtvigil</rbf>
-    <mameversion>0237</mameversion>
+    <mameversion>0232</mameversion>
     <year>1988</year>
     <manufacturer>bootleg</manufacturer>
     <players>2</players>
@@ -43,8 +43,8 @@
         <part name="d04_c01.bin" crc="9b85101d"/>
         <!-- gfx1 - starts at 0x40000 -->
         <interleave output="16">
-            <part name="f05_c08.bin" crc="01579d20" map="01"/>
-            <part name="h05_c09.bin" crc="4f5872f0" map="10"/>
+            <part name="h05_c09.bin" crc="4f5872f0" map="01"/>
+            <part name="f05_c08.bin" crc="01579d20" map="10"/>
         </interleave>
         <part repeat="0x20000"> FF</part>
         <!-- gfx3 - starts at 0x80000 -->

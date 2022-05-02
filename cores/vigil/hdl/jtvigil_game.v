@@ -125,7 +125,7 @@ assign ba0_din              = 0;
 assign ba0_din_m            = 3;
 assign LHBL_dly             = LHBL;
 assign LVBL_dly             = LVBL;
-assign debug_view           = {5'd0, scr2col};
+assign debug_view           = { flip, 4'd0, scr2col};
 
 jtframe_cen3p57 #(.CLK24(1)) u_cencpu(
     .clk        ( clk24     ),
@@ -133,6 +133,7 @@ jtframe_cen3p57 #(.CLK24(1)) u_cencpu(
     .cen_1p78   ( fm_cen    )
 );
 
+`ifndef NOMAIN
 jtvigil_main u_main(
     .rst         ( rst24      ),
     .clk         ( clk24      ),
@@ -173,6 +174,19 @@ jtvigil_main u_main(
     .dipsw_a     ( dipsw_a    ),
     .dipsw_b     ( dipsw_b    )
 );
+`else
+    assign pal_cs    = 0;
+    assign scr_cs    = 0;
+    assign scr1pos   = 0;
+    assign scr2pos   = { debug_bus, 3'd0 };
+    assign scr2col   = 0;
+    assign latch_wr  = 0;
+    assign main_addr = 0;
+    assign main_cs   = 0;
+    assign main_dout = 0;
+    assign flip      = 0;
+`endif
+
 
 jtvigil_video u_video(
     .rst        ( rst       ),

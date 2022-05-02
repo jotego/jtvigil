@@ -106,7 +106,7 @@ always @* begin
     prog_addr = pre_addr;
     // moves the H address bit to the LSBs
     if( is_tiles )
-        prog_addr[3:0] = { pre_addr[2:0], pre_addr[4] };
+        prog_addr[3:0] = { pre_addr[2:0], pre_addr[3] };
     if( is_obj )
         prog_addr[5:0] = { pre_addr[3:0], pre_addr[5:4] };
 end
@@ -132,7 +132,7 @@ jtframe_dwnld #(
     .header       (                ),
     .sdram_ack    ( prog_ack       )
 );
-
+/* verilator tracing_off */
 jtframe_rom_1slot #(
     .SLOT0_DW( 8),
     .SLOT0_AW(18)
@@ -241,5 +241,5 @@ jtframe_rom_1slot #(
     .data_rdy   ( ba_rdy[3]  ),
     .data_read  ( data_read  )
 );
-
+/* verilator tracing_on */
 endmodule

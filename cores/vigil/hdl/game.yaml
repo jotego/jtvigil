@@ -31,6 +31,8 @@ jtframe:
   - from: video
     get:
       - jtframe_vtimer.v
+  - get:
+      - jtframe_sort.v
 modules:
   jt:
     - name: jt51
