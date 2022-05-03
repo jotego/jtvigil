@@ -82,7 +82,7 @@ wire        pal_we;
 
 assign obj_blank  = obj_pxl[3:0]==0 || !gfx_en[3];
 assign scr1_blank = scr1_pxl[3:0]==0 || !gfx_en[0];
-assign scr1_wins  = !scr1_blank && scr1_pxl[7:6]==3;
+assign scr1_wins  = !scr1_blank && scr1_pxl[7:6]==3 && scr1_pxl[3];
 assign pal_addr   = { sel, sub[2:1], pal_base };
 assign pal_we     = pal_cs & ~main_rnw;
 

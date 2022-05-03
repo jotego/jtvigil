@@ -47,6 +47,8 @@ module jtvigil_obj(
 //   6    |  X
 //   7    |  0 - X msb
 
+localparam [8:0] TILE_DLY = 9'ha;
+
 reg  [ 4:0] obj_cnt;
 reg  [ 2:0] sub_cnt;
 reg         aux_cen, LHBL_l, done, dr_start;
@@ -106,8 +108,9 @@ always @(posedge clk, posedge rst) begin
                 3: ypos      <= { scan_dout[0], ypos[7:0] } + 8'h80;
                 4: code[7:0] <= scan_dout; // 1:0 bits can be replaced by suby in large objects
                 5: begin
-                    { vflip, hflip }      <= scan_dout[7:6]^{2{flip}};
-                    { hsize, code[11:8] } <= scan_dout[5:0];
+                    { vflip, hflip } <= scan_dout[7:6]^{2{flip}};
+                    hsize            <= scan_dout[5:4];
+                    code[11:8]       <= { scan_dout[2], scan_dout[3], scan_dout[1:0] };
                 end
                 6: xpos[7:0] <= scan_dout;
                 7: xpos      <= { scan_dout[0], xpos[7:0] };
@@ -117,15 +120,15 @@ always @(posedge clk, posedge rst) begin
                     0: match <= ydiff < 16;
                     1: begin
                         match <= ydiff < 32;
-                        code[0] <= ydiff[5]^vflip;
+                        code[0] <= ydiff[4]^vflip;
                     end
                     2: begin
                         match <= ydiff < 64;
-                        code[1:0] <= ydiff[6:5]^{2{vflip}};
+                        code[1:0] <= ydiff[5:4]^{2{vflip}};
                     end
                     3: begin
                         match <= ydiff < 128;
-                        code[2:0] <= ydiff[7:5]^{3{vflip}};
+                        code[2:0] <= ydiff[6:4]^{3{vflip}};
                     end
                 endcase
             end
@@ -170,7 +173,7 @@ always @(posedge clk, posedge rst) begin
                 dr_busy  <= 1;
                 cur_pal  <= pal;
                 cur_hflip<= hflip;
-                buf_addr <= xpos + 9'h180;
+                buf_addr <= xpos + 9'h180 + TILE_DLY;
                 rom_cs   <= 1;
                 rom_good <= 0;
                 buf_cnt  <= 0;
