@@ -61,6 +61,8 @@ module jtvigil_colmix(
     input      [7:0] obj_pxl,
     input            scr2enb,
 
+    input     [ 8:0] v,
+    input      [7:0] debug_bus,
     // Debug
     input      [3:0] gfx_en,
 
@@ -78,13 +80,14 @@ wire [10:0] pal_addr;
 reg  [ 7:0] pal_base;
 wire [ 7:0] pal_dout;
 reg  [ 4:0] pre_r, pre_g, pre_b;
-wire        pal_we;
+wire        pal_we, score_row;
 
 assign obj_blank  = obj_pxl[3:0]==0 || !gfx_en[3];
 assign scr1_blank = scr1_pxl[3:0]==0 || !gfx_en[0];
 assign scr1_wins  = !scr1_blank && scr1_pxl[7:6]==3 && scr1_pxl[3];
 assign pal_addr   = { sel, sub[2:1], pal_base };
 assign pal_we     = pal_cs & ~main_rnw;
+assign score_row  = v < 9'd48;
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
@@ -109,8 +112,9 @@ always @(posedge clk, posedge rst) begin
             if( obj_blank || scr1_wins ) begin
                 sel      <= SCR[0];
                 pal_base <=
-                    scr2enb    ? scr1_pxl :
-                    scr1_blank ? { scr2col[2:1], 1'b0, scr2col[0], scr2_pxl } : scr1_pxl;
+                    scr2enb /*|| score_row*/ ? scr1_pxl :
+                    scr1_blank ? { /*scr2col[2:1], score_row, scr2col[0]*/
+                        1'b0,debug_bus[7:5], scr2_pxl } : scr1_pxl;
             end else begin
                 sel      <= OBJ[0];
                 pal_base <= obj_pxl;

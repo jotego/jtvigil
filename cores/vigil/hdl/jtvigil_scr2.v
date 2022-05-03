@@ -24,33 +24,49 @@ module jtvigil_scr2(
 
     input  [ 8:0] h,
     input  [ 8:0] v,
+    input         LVBL,
     input  [10:0] scrpos,
     output [17:0] rom_addr,
     input  [31:0] rom_data, // 32/4 = 8 pixels
     output        rom_cs,
     input         rom_ok,
-    output [ 3:0] pxl
+    output [ 3:0] pxl,
+    input  [ 7:0] debug_bus
 );
 
-reg  [10:0] hsum;
+reg  [11:0] hsum;
 reg  [31:0] pxl_data;
-wire [ 7:0] pxl_pair;
 
-assign rom_cs   = 1;
-assign rom_addr = { hsum[10:9], v[7:0], hsum[8:3], 2'b0 };
-assign pxl_pair = flip ? pxl_data[31:24] : pxl_data[7:0];
-assign pxl = ~hsum[0] ^ flip ?
-    { pxl_pair[7], pxl_pair[5], pxl_pair[3], pxl_pair[1] } :
-    { pxl_pair[6], pxl_pair[4], pxl_pair[2], pxl_pair[0] };
+assign rom_cs   = LVBL;
+assign rom_addr = { /*debug_bus[7:4]*/ 1'b0, hsum[10:9],
+    v[7:0], hsum[8:3], ~flip };
+assign pxl = hsum[0] /*^ flip*/ ?
+    { pxl_data[6], pxl_data[4], pxl_data[2], pxl_data[0] } :
+    { pxl_data[7], pxl_data[5], pxl_data[3], pxl_data[1] };
 
 always @(posedge clk) if(pxl_cen) begin
-    hsum <= { 2'd0, h } + scrpos;
+    hsum <= { 2'b11, h^{9{~flip}} } + scrpos + 9'h80;
     case( hsum[2:0] )   // 8 pixel delay
-        0: pxl_data <= rom_data;
+        0: pxl_data <= ~flip ?
+            { rom_data[15:0], rom_data[31:16] } :
+            rom_data;
         2,4,6: begin
-            pxl_data <= flip ? pxl_data << 8 : pxl_data >> 8;
+            pxl_data <= pxl_data >> 8;
         end
     endcase
 end
+/*
+jtframe_dual_ram u_buffer (
+    .clk0 ( clk      ),
+    .data0( pxl_data ),
+    .addr0( addr0),
+    .we0  (we0  ),
+    .q0   (q0   ),
+    .clk1 (clk1 ),
+    .data1(data1),
+    .addr1(addr1),
+    .we1  (we1  )
+);*/
+
 
 endmodule

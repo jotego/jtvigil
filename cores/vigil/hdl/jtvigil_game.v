@@ -125,7 +125,7 @@ assign ba0_din              = 0;
 assign ba0_din_m            = 3;
 assign LHBL_dly             = LHBL;
 assign LVBL_dly             = LVBL;
-assign debug_view           = { flip, 4'd0, scr2col};
+assign debug_view           = scr2pos[10:3]; //{ flip, 4'd0, scr2col};
 
 jtframe_cen3p57 #(.CLK24(1)) u_cencpu(
     .clk        ( clk24     ),

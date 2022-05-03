@@ -101,8 +101,8 @@ jtframe_vtimer #(
     .VB_START ( 9'd255          ),
     .VB_END   ( 9'd279          ),
     .VS_START ( 9'd260          ),
-    .HB_END   ( 9'd7            ),
-    .HB_START ( 9'd263          ),
+    .HB_END   ( 9'd9            ),
+    .HB_START ( 9'd265          ),
     .HCNT_END ( 9'd383          ),
     .HS_START ( 9'd304          ),
     .HS_END   ( 9'd336          )
@@ -163,6 +163,7 @@ jtvigil_scr2 u_scr2 (
     .clk        ( clk         ),
     .pxl_cen    ( pxl_cen     ),
     .flip       ( flip        ),
+    .LVBL       ( LVBL        ),
     .h          ( h           ),
     .v          ( v           ),
     .scrpos     ( scr2pos     ),
@@ -170,7 +171,8 @@ jtvigil_scr2 u_scr2 (
     .rom_data   ( scr2_data   ),
     .rom_cs     ( scr2_cs     ),
     .rom_ok     ( scr2_ok     ),
-    .pxl        ( scr2_pxl    )
+    .pxl        ( scr2_pxl    ),
+    .debug_bus  ( debug_bus   )
 );
 `else
     assign scr2_cs   = 0;
@@ -212,6 +214,7 @@ jtvigil_colmix u_colmix (
     .pxl_cen  ( pxl_cen        ),
     .LHBL     ( LHBL           ),
     .LVBL     ( LVBL           ),
+    .v        ( v              ),
     .main_addr( main_addr[10:0]), // TODO: Check connection ! Signal/port not matching : Expecting logic [10:0]  -- Found logic [11:0]
     .main_dout( main_dout      ),
     .main_din ( pal_dout       ),
@@ -225,7 +228,8 @@ jtvigil_colmix u_colmix (
     .gfx_en   ( gfx_en         ),
     .red      ( red            ),
     .green    ( green          ),
-    .blue     ( blue           )
+    .blue     ( blue           ),
+    .debug_bus( debug_bus      )
 );
 
 
