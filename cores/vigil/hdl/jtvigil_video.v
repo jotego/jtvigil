@@ -149,14 +149,6 @@ jtvigil_scr1 u_scr1 (
     assign scr1_pxl  = 0;
 `endif
 
-wire [3:0] sorted;
-
-jtframe_sort u_sort (
-    .debug_bus( debug_bus ),
-    .busin    ( scr2_pxl  ),
-    .busout   ( sorted    )
-);
-
 `ifndef NOSCR2
 jtvigil_scr2 u_scr2 (
     .rst        ( rst         ),
@@ -222,7 +214,7 @@ jtvigil_colmix u_colmix (
     .pal_cs   ( pal_cs         ),
     .scr1_pxl ( scr1_pxl       ),
     .scr2col  ( scr2col        ),
-    .scr2_pxl ( /*scr2_pxl*/ sorted ),
+    .scr2_pxl ( scr2_pxl       ),
     .scr2enb  ( scr2enb        ),
     .obj_pxl  ( obj_pxl        ),
     .gfx_en   ( gfx_en         ),
