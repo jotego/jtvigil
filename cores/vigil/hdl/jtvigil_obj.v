@@ -47,7 +47,8 @@ module jtvigil_obj(
 //   6    |  X
 //   7    |  0 - X msb
 
-localparam [8:0] TILE_DLY = 9'ha;
+localparam [8:0] TILE_DLY = 9'ha,
+                 VSCORE   = 9'd48;
 
 reg  [ 4:0] obj_cnt;
 reg  [ 2:0] sub_cnt;
@@ -113,7 +114,7 @@ always @(posedge clk, posedge rst) begin
                     code[11:8]       <= { scan_dout[2], scan_dout[3], scan_dout[1:0] };
                 end
                 6: xpos[7:0] <= scan_dout;
-                7: xpos      <= { scan_dout[0], xpos[7:0] };
+                7: xpos      <= { scan_dout[0], xpos[7:0] }; // this state will repeat if dr_busy
             endcase
             if( sub_cnt==6 ) begin
                 case( hsize )
@@ -131,6 +132,7 @@ always @(posedge clk, posedge rst) begin
                         code[2:0] <= ydiff[6:4]^{3{vflip}};
                     end
                 endcase
+                if( v < VSCORE ) match <= 0;
             end
             if( sub_cnt==7 ) begin
                 if( !match || (match && !dr_busy ) ) begin
