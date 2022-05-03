@@ -128,7 +128,7 @@ always @(posedge clk, posedge rst) begin
         if( scr2col_cs ) begin
             // bit 6 ROME ? ROMF ?
             scr2enb <= cpu_dout[6];
-            scr2col <= {cpu_dout[3], cpu_dout[1:0]};
+            scr2col <= {cpu_dout[3:2], cpu_dout[0]};
         end
     end
 end
