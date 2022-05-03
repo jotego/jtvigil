@@ -34,6 +34,7 @@ module jtvigil_obj(
     input      [31:0] rom_data,
     output reg        rom_cs,
     input             rom_ok,
+    input      [ 7:0] debug_bus,
     output     [ 7:0] pxl
 );
 
@@ -63,11 +64,12 @@ reg  [ 2:0] buf_cnt;
 reg  [ 8:0] buf_addr;
 reg  [31:0] pxl_data;
 wire [ 7:0] buf_data;
-reg         buf_we, rom_good;
+reg         buf_we;
+reg  [ 1:0] rom_good;
 reg         cur_hflip, half_done;
 
 assign scan_addr = { obj_cnt, sub_cnt };
-assign ydiff     = ypos - vf;
+assign ydiff     = vf-ypos;
 
 // Table scan
 always @(posedge clk, posedge rst) begin
@@ -101,18 +103,30 @@ always @(posedge clk, posedge rst) begin
             case( sub_cnt )
                 0: pal       <= scan_dout[3:0];
                 2: ypos[7:0] <= scan_dout;
-                3: ypos[8]   <= scan_dout[0];
+                3: ypos      <= { scan_dout[0], ypos[7:0] } + 8'h80;
                 4: code[7:0] <= scan_dout; // 1:0 bits can be replaced by suby in large objects
-                5: { vflip, hflip, hsize, code[11:8] } <= scan_dout;
+                5: begin
+                    { vflip, hflip }      <= scan_dout[7:6]^{2{flip}};
+                    { hsize, code[11:8] } <= scan_dout[5:0];
+                end
                 6: xpos[7:0] <= scan_dout;
-                7: xpos[8]   <= scan_dout[0];
+                7: xpos      <= { scan_dout[0], xpos[7:0] };
             endcase
             if( sub_cnt==6 ) begin
                 case( hsize )
                     0: match <= ydiff < 16;
-                    1: match <= ydiff < 32;
-                    2: match <= ydiff < 64;
-                    3: match <= ydiff <128;
+                    1: begin
+                        match <= ydiff < 32;
+                        code[0] <= ydiff[4]^vflip;
+                    end
+                    2: begin
+                        match <= ydiff < 64;
+                        code[1:0] <= ydiff[5:4]^{2{vflip}};
+                    end
+                    3: begin
+                        match <= ydiff < 128;
+                        code[2:0] <= ydiff[6:4]^{3{vflip}};
+                    end
                 endcase
             end
             if( sub_cnt==7 ) begin
@@ -121,7 +135,10 @@ always @(posedge clk, posedge rst) begin
                     sub_cnt <= 0;
                     if( &obj_cnt ) done <= 1;
                 end
-                if( !dr_busy ) dr_start <= match;
+                if( !dr_busy ) begin
+                    dr_start <= match;
+                    match <= 0;
+                end
             end
         end
     end
@@ -146,27 +163,29 @@ always @(posedge clk, posedge rst) begin
         buf_cnt   <= 0;
         half_done <= 0;
     end else begin
-        rom_good <= rom_ok;
+        rom_good <= { rom_good[0], rom_ok};
         if( !dr_busy ) begin
             if( dr_start ) begin
-                rom_addr <= { code, ydiff[3:0]^{4{vflip}}, hflip, 1'b0 };
+                rom_addr <= { code, ydiff[3:0]^{4{vflip}}, ~hflip, 1'b0 };
                 dr_busy  <= 1;
                 cur_pal  <= pal;
                 cur_hflip<= hflip;
-                buf_addr <= xpos;
+                buf_addr <= xpos + 9'h180;
                 rom_cs   <= 1;
                 rom_good <= 0;
                 buf_cnt  <= 0;
                 half_done<= 0;
             end
         end else begin
-            if( rom_good && !buf_we ) begin
-                rom_addr[1] <= ~cur_hflip;
+            if( rom_good==3 && !buf_we ) begin
+                if( !half_done ) rom_addr[1] <= ~rom_addr[1];
                 buf_we   <= 1;
-                pxl_data <= { rom_data[31:28], rom_data[15:12],
-                              rom_data[27:24], rom_data[11: 8],
-                              rom_data[23:20], rom_data[ 7: 4],
-                              rom_data[19:16], rom_data[ 3: 0] };
+                pxl_data <= {
+                    rom_data[15:12], rom_data[31:28],
+                    rom_data[11: 8], rom_data[27:24],
+                    rom_data[ 7: 4], rom_data[23:20],
+                    rom_data[ 3: 0], rom_data[19:16]
+                };
             end
             if( buf_we ) begin
                 pxl_data <= cur_hflip ? pxl_data << 1 : pxl_data >> 1;
@@ -183,7 +202,7 @@ end
 
 // The original address multiplexer only lets
 // the CPU address go through while in V blanking
-jtframe_dual_ram #(.aw(8)) u_vram(
+jtframe_dual_ram #(.aw(8),.simfile("obj.bin")) u_vram(
     // CPU
     .clk0 ( clk_cpu   ),
     .addr0( main_addr ),
@@ -201,7 +220,7 @@ jtframe_dual_ram #(.aw(8)) u_vram(
 jtframe_obj_buffer #(.ALPHA(0)) u_obj_buffer (
     .clk     ( clk         ),
     .LHBL    ( LHBL        ),
-    .flip    ( flip        ),
+    .flip    ( 1'b0        ),
     .wr_data ( buf_data    ),
     .wr_addr ( buf_addr    ),
     .we      ( buf_we      ),

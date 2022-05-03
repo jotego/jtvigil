@@ -184,7 +184,7 @@ jtvigil_main u_main(
     assign main_addr = 0;
     assign main_cs   = 0;
     assign main_dout = 0;
-    assign flip      = 0;
+    assign flip      = 1;
 `endif
 
 

@@ -153,11 +153,11 @@ wire [3:0] sorted;
 
 jtframe_sort u_sort (
     .debug_bus( debug_bus ),
-    .busin    ( scr1_pxl[3:0] ),
-    .busout   ( sorted )
+    .busin    ( scr2_pxl  ),
+    .busout   ( sorted    )
 );
 
-
+`ifndef NOSCR2
 jtvigil_scr2 u_scr2 (
     .rst        ( rst         ),
     .clk        ( clk         ),
@@ -172,6 +172,12 @@ jtvigil_scr2 u_scr2 (
     .rom_ok     ( scr2_ok     ),
     .pxl        ( scr2_pxl    )
 );
+`else
+    assign scr2_cs   = 0;
+    assign scr2_addr = 0;
+    assign scr2_pxl  = 0;
+`endif
+
 
 `ifndef NOOBJ
 jtvigil_obj u_obj (
@@ -190,7 +196,8 @@ jtvigil_obj u_obj (
     .rom_data ( obj_data       ),
     .rom_cs   ( obj_cs         ),
     .rom_ok   ( obj_ok         ),
-    .pxl      ( obj_pxl        )
+    .pxl      ( obj_pxl        ),
+    .debug_bus( debug_bus      )
 );
 `else
     assign obj_cs   = 0;
@@ -210,9 +217,9 @@ jtvigil_colmix u_colmix (
     .main_din ( pal_dout       ),
     .main_rnw ( main_rnw       ),
     .pal_cs   ( pal_cs         ),
-    .scr1_pxl ( {scr1_pxl[7:4],sorted }       ),
+    .scr1_pxl ( scr1_pxl       ),
     .scr2col  ( scr2col        ),
-    .scr2_pxl ( scr2_pxl       ),
+    .scr2_pxl ( /*scr2_pxl*/ sorted ),
     .scr2enb  ( scr2enb        ),
     .obj_pxl  ( obj_pxl        ),
     .gfx_en   ( gfx_en         ),

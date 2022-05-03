@@ -73,7 +73,7 @@ localparam OBJ=0, SCR=1;
 
 wire        obj_blank, scr1_blank, scr1_wins;
 reg         sel;
-reg  [ 2:0] aux;
+reg  [ 2:0] sub;
 wire [10:0] pal_addr;
 reg  [ 7:0] pal_base;
 wire [ 7:0] pal_dout;
@@ -82,17 +82,18 @@ wire        pal_we;
 
 assign obj_blank  = obj_pxl[3:0]==0 || !gfx_en[3];
 assign scr1_blank = scr1_pxl[3:0]==0 || !gfx_en[0];
-assign scr1_wins  = !scr1_blank && scr1_pxl[7:6]==3 && scr1_pxl[4];
+assign scr1_wins  = !scr1_blank && scr1_pxl[7:6]==3;
 assign pal_addr   = { sel, sub[2:1], pal_base };
 assign pal_we     = pal_cs & ~main_rnw;
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
-        aux <= 0;
+        sub <= 0;
     end else begin
+        sub <= sub + 3'd1;
         `ifndef GRAY
         if( sub[0] )
-            case( sub[2:1]-aux )
+            case( sub[2:1] )
                 0: pre_r <= pal_dout[4:0];
                 1: pre_g <= pal_dout[4:0];
                 2: pre_b <= pal_dout[4:0];
