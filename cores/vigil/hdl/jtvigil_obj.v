@@ -117,15 +117,15 @@ always @(posedge clk, posedge rst) begin
                     0: match <= ydiff < 16;
                     1: begin
                         match <= ydiff < 32;
-                        code[0] <= ydiff[4]^vflip;
+                        code[0] <= ydiff[5]^vflip;
                     end
                     2: begin
                         match <= ydiff < 64;
-                        code[1:0] <= ydiff[5:4]^{2{vflip}};
+                        code[1:0] <= ydiff[6:5]^{2{vflip}};
                     end
                     3: begin
                         match <= ydiff < 128;
-                        code[2:0] <= ydiff[6:4]^{3{vflip}};
+                        code[2:0] <= ydiff[7:5]^{3{vflip}};
                     end
                 endcase
             end
