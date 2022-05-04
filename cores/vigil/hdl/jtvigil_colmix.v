@@ -91,7 +91,10 @@ assign score_row  = v < 9'd48;
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
-        sub <= 0;
+        sub   <= 0;
+        red   <= 0;
+        green <= 0;
+        blue  <= 0;
     end else begin
         sub <= sub + 3'd1;
         `ifndef GRAY

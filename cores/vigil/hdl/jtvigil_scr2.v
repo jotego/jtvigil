@@ -45,7 +45,7 @@ assign pxl = hsum[0] /*^ flip*/ ?
     { pxl_data[7], pxl_data[5], pxl_data[3], pxl_data[1] };
 
 always @(posedge clk) if(pxl_cen) begin
-    hsum <= { 2'b11, h^{9{~flip}} } + scrpos + 9'h80;
+    hsum <= { 2'b11, h^{9{~flip}} } + scrpos + 9'h7E;
     case( hsum[2:0] )   // 8 pixel delay
         0: pxl_data <= ~flip ?
             { rom_data[15:0], rom_data[31:16] } :
