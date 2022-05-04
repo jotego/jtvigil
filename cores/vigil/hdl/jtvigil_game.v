@@ -176,7 +176,7 @@ jtvigil_main u_main(
 );
 `else
     assign pal_cs    = 0;
-    assign scr_cs    = 0;
+    assign scr1_cs   = 0;
     assign scr1pos   = 0;
     assign scr2pos   = { debug_bus, 3'd0 };
     assign scr2col   = 0;

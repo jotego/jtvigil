@@ -31,6 +31,7 @@ jtframe:
   - from: video
     get:
       - jtframe_vtimer.v
+      - jtframe_linebuf.v
   - get:
       - jtframe_sort.v
 modules:

@@ -94,18 +94,22 @@ jtframe_cen48 u_cen48(
     .cen1p5b(          )
 );
 
-// HSync lasts for 32 pixels, from pixel 48 to 80. Blanking is 128 pxl
-// 55 Hz according to MAME
+// Measured on the original PCB by atrac17
+// Pixel clock is 6.144MHz
+// HSync lasts for 32 pixels, from pixel 40 to 72.
+// V blank is 119 pxl to get to, lasts for 28 lines
+// H freq 16.00 kHz
+// V freq 56.34  Hz
 jtframe_vtimer #(
     .V_START  ( 9'd0            ),
     .VB_START ( 9'd255          ),
-    .VB_END   ( 9'd279          ),
+    .VB_END   ( 9'd283          ),
     .VS_START ( 9'd260          ),
     .HB_END   ( 9'd9            ),
     .HB_START ( 9'd265          ),
     .HCNT_END ( 9'd383          ),
-    .HS_START ( 9'd304          ),
-    .HS_END   ( 9'd336          )
+    .HS_START ( 9'd265+9'd40    ),
+    .HS_END   ( 9'd265+9'd40+9'd32 )
 ) u_vtimer(
     .clk        ( clk       ),
     .pxl_cen    ( pxl_cen   ),
@@ -156,7 +160,9 @@ jtvigil_scr2 u_scr2 (
     .clk        ( clk         ),
     .pxl_cen    ( pxl_cen     ),
     .flip       ( flip        ),
+    .LHBL       ( LHBL        ),
     .LVBL       ( LVBL        ),
+    .HS         ( HS          ),
     .h          ( h           ),
     .v          ( vrender     ),
     .scrpos     ( scr2pos     ),
