@@ -66,7 +66,7 @@ always @(posedge clk) rst_n <= ~rst;
 
 always @* begin
     // Memory mapped
-    rom_cs  = !mreq_n && A[15:14]<=2'b10;
+    rom_cs  = !mreq_n && A[15:12]!=4'hf;
     ram_cs  = !mreq_n && A[15:12]==4'hf;
     // IO mapped R/W
     fm_cs   = !iorq_n && !A[7];
