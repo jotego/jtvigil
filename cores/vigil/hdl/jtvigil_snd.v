@@ -47,7 +47,7 @@ localparam [7:0] FM_GAIN  = 8'h08,
                  PCM_GAIN = 8'h08;
 
 wire [15:0] A;
-wire [ 7:0] ram_dout, fm_dout, cpu_dout;
+wire [ 7:0] ram_dout, fm_dout, cpu_dout, int_addr;
 reg  [ 7:0] cpu_din, latch;
 reg  [ 2:0] bank;
 reg         rst_n, ram_cs,  cntcs_l,
@@ -55,12 +55,14 @@ reg         rst_n, ram_cs,  cntcs_l,
             hi_cs, lo_cs, cnt_cs, pcm_rd;
 wire        rd_n, wr_n, mreq_n, iorq_n;
 reg         main_intn;
-wire        fm_intn;
+wire        fm_intn, int_cs, m1_n;
 
 wire signed [15:0] left, right;
 
 assign pcm_cs   = 1;
 assign rom_addr = A;
+assign int_cs   = ~m1_n & ~iorq_n;
+assign int_addr = { 2'b11, main_intn, fm_intn, 4'hf };
 
 always @(posedge clk) rst_n <= ~rst;
 
@@ -89,7 +91,7 @@ always @(posedge clk, posedge rst) begin
         main_intn <= 1;
     end else begin
         if( latch_wr ) begin
-            latch <= main_dout;
+            latch     <= main_dout;
             main_intn <= 0;
         end
         if( irq_clr ) main_intn <= 1;
@@ -118,6 +120,7 @@ always @(posedge clk, posedge rst) begin
             ram_cs   ? ram_dout :
             pcm_rd   ? pcm_data :
             latch_cs ? latch    :
+            int_cs   ? int_addr :
             fm_cs    ? fm_dout  : 8'hff;
     end
 end
@@ -131,8 +134,9 @@ jtframe_sysz80 #(
     .cpu_cen    (           ),
     .int_n      ( int_n     ),
     .nmi_n      ( ~v1       ),
+    //.nmi_n      ( 1'b1      ),
     .busrq_n    ( 1'b1      ),
-    .m1_n       (           ),
+    .m1_n       ( m1_n      ),
     .mreq_n     ( mreq_n    ),
     .iorq_n     ( iorq_n    ),
     .rd_n       ( rd_n      ),
