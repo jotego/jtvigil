@@ -270,7 +270,8 @@ jtvigil_video u_video(
 
         .snd        ( snd       ),
         .sample     ( sample    ),
-        .peak       ( game_led  )
+        .peak       ( game_led  ),
+        .debug_bus  ( debug_bus )
     );
 `else
     assign snd_cs   = 0;

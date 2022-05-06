@@ -38,6 +38,7 @@ module jtvigil_snd(
     input         [ 7:0] pcm_data,
     input                pcm_ok,
 
+    input         [ 7:0] debug_bus,
     output signed [15:0] snd,
     output               sample,
     output               peak
@@ -99,15 +100,31 @@ always @(posedge clk, posedge rst) begin
 end
 
 // PCM controller
+
+reg  [7:0] pcm_good;
+reg  [1:0] pcm_rdy;
+reg        pcm_sample;
+
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
-        pcm_addr <= 16'd0;
-        cntcs_l  <= 0;
+        pcm_addr   <= 16'd0;
+        cntcs_l    <= 0;
+        pcm_good   <= 0;
+        pcm_sample <= 0;
     end else begin
-        cntcs_l <= cnt_cs;
+        cntcs_l    <= cnt_cs;
+        pcm_rdy    <= { pcm_rdy[0], pcm_ok };
+        pcm_sample <= 0;
+        if( pcm_rdy==2'b01 && pcm_ok ) begin
+            pcm_good   <= pcm_data - 8'h80;
+            pcm_sample <= 1;
+        end
         if( hi_cs ) pcm_addr[15:8] <= cpu_dout;
         if( lo_cs ) pcm_addr[ 7:0] <= cpu_dout;
-        if( cnt_cs && !cntcs_l ) pcm_addr <= pcm_addr + 16'd1;
+        if( cnt_cs && !cntcs_l ) begin
+            pcm_addr <= pcm_addr + 16'd1;
+            pcm_rdy  <= 0;
+        end
     end
 end
 
@@ -174,6 +191,17 @@ jt51 u_jt51 (
     .xright  ( right      )
 );
 
+wire [15:0] pcm_fir;
+
+jtframe_uprate2_fir u_uprate(
+    .rst     ( rst        ),
+    .clk     ( clk        ),
+    .sample  ( pcm_sample ),
+    .l_in    ( { pcm_good, 8'd0 }   ),
+    .r_in    (            ),
+    .l_out   ( pcm_fir    ),
+    .r_out   (            )
+);
 
 jtframe_mixer #(.W2(8)) u_mixer (
     .rst   ( rst        ),
@@ -181,7 +209,7 @@ jtframe_mixer #(.W2(8)) u_mixer (
     .cen   ( fm_cen     ),
     .ch0   ( left       ),
     .ch1   ( right      ),
-    .ch2   ( pcm_data   ),
+    .ch2   ( debug_bus ? pcm_good : pcm_fir[15:8] ),
     .ch3   ( 16'd0      ),
     .gain0 ( FM_GAIN    ),
     .gain1 ( FM_GAIN    ),

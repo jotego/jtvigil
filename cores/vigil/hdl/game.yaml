@@ -18,12 +18,14 @@ jtframe:
     get:
       - jtframe_cen24.v
       - jtframe_cen48.v
+      - jtframe_frac_cen.v
   - from: ram
     get:
       - jtframe_obj_buffer.v
   - from: sound
     get:
       - jtframe_mixer.v
+      - jtframe_uprate2_fir.yaml
   - from: sdram
     get:
       - jtframe_dwnld.v
