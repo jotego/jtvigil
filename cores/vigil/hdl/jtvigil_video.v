@@ -102,11 +102,13 @@ jtframe_cen48 u_cen48(
 // V sync starts 8 lines after Vblank and lasts for 6 lines
 // H freq 16.00 kHz
 // V freq 56.34  Hz
+localparam [8:0] HDLY = 8;
+
 jtframe_vtimer #(
-    .HB_END   ( 9'd9               ),
-    .HB_START ( 9'd265             ),
-    .HS_START ( 9'd265+9'd40       ),
-    .HS_END   ( 9'd265+9'd40+9'd32 ),
+    .HB_END   ( HDLY                    ),
+    .HB_START ( 9'd255+HDLY+9'd1        ),
+    .HS_START ( 9'd255+HDLY+9'd40       ),
+    .HS_END   ( 9'd255+HDLY+9'd40+9'd32 ),
     .HCNT_END ( 9'd383             ),
 
     .V_START  ( 9'd0               ),
@@ -141,7 +143,7 @@ jtvigil_scr1 u_scr1 (
     .main_din ( scr1_dout   ),
     .main_rnw ( main_rnw    ),
     .scr1_cs  ( scr1_ramcs  ),
-    .LHBL     ( LHBL        ),
+    .hs       ( HS          ),
     .h        ( h           ),
     .v        ( v           ),
     .scrpos   ( scr1pos     ),

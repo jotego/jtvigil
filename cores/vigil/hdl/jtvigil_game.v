@@ -125,7 +125,7 @@ assign ba0_din              = 0;
 assign ba0_din_m            = 3;
 assign LHBL_dly             = LHBL;
 assign LVBL_dly             = LVBL;
-assign debug_view           = scr2pos[10:3]; //{ flip, 4'd0, scr2col};
+assign debug_view           = 0; // scr1pos[8:1]; //{ flip, 4'd0, scr2col};
 
 jtframe_cen3p57 #(.CLK24(1)) u_cencpu(
     .clk        ( clk24     ),
@@ -251,6 +251,9 @@ jtvigil_video u_video(
         .cpu_cen    ( cpu_cen   ),
         .fm_cen     ( fm_cen    ),
         .v1         ( v1        ),
+
+        .enable_fm  ( enable_fm ),
+        .enable_psg ( enable_psg),
 
         // From main CPU
         .main_dout  ( main_dout ),

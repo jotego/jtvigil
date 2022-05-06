@@ -132,7 +132,7 @@ jtframe_dwnld #(
     .header       (                ),
     .sdram_ack    ( prog_ack       )
 );
-/* verilator tracing_off */
+/* xxverilator tracing_off */
 jtframe_rom_1slot #(
     .SLOT0_DW( 8),
     .SLOT0_AW(18)

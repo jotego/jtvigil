@@ -115,7 +115,7 @@ always @(posedge clk, posedge rst) begin
             if( obj_blank || scr1_wins ) begin
                 sel      <= SCR[0];
                 pal_base <=
-                    (scr2enb || scr1_pxl[7:4]>=4 ) ? scr1_pxl :
+                    (scr2enb || scr1_pxl[7] || scr1_pxl[6] ) ? scr1_pxl :
                     scr1_blank ? { scr2col[2:1], score_row, scr2col[0], scr2_pxl } : scr1_pxl;
             end else begin
                 sel      <= OBJ[0];

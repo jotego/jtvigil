@@ -23,6 +23,9 @@ module jtvigil_snd(
     input                fm_cen,
     input                v1,
 
+    input                enable_psg,
+    input                enable_fm,
+
     // From main
     input         [ 7:0] main_dout,
     input                latch_wr,
@@ -44,8 +47,8 @@ module jtvigil_snd(
     output               peak
 );
 
-localparam [7:0] FM_GAIN  = 8'h08,
-                 PCM_GAIN = 8'h08;
+wire [7:0] FM_GAIN  = enable_fm  ? 8'h08 : 8'h0,
+           PCM_GAIN = enable_psg ? 8'h08 : 8'h0;
 
 wire [15:0] A;
 wire [ 7:0] ram_dout, fm_dout, cpu_dout, int_addr;
@@ -116,7 +119,7 @@ always @(posedge clk, posedge rst) begin
         pcm_rdy    <= { pcm_rdy[0], pcm_ok };
         pcm_sample <= 0;
         if( pcm_rdy==2'b01 && pcm_ok ) begin
-            pcm_good   <= pcm_data - 8'h80;
+            pcm_good   <= pcm_data;
             pcm_sample <= 1;
         end
         if( hi_cs ) pcm_addr[15:8] <= cpu_dout;
@@ -192,24 +195,35 @@ jt51 u_jt51 (
 );
 
 wire [15:0] pcm_fir;
+wire [ 7:0] pcm_ac;
+wire        pcm2_sample;
+
+jtframe_dcrm u_dcrm(
+    .rst     ( rst        ),
+    .clk     ( clk        ),
+    .sample  ( pcm_sample ),
+    .din     ( pcm_good   ),
+    .dout    ( pcm_ac     )
+);
 
 jtframe_uprate2_fir u_uprate(
     .rst     ( rst        ),
     .clk     ( clk        ),
     .sample  ( pcm_sample ),
-    .l_in    ( { pcm_good, 8'd0 }   ),
-    .r_in    (            ),
+    .upsample( pcm2_sample),
+    .l_in    ( { pcm_ac, 8'd0 }   ),
+    .r_in    ( 16'd0      ),
     .l_out   ( pcm_fir    ),
     .r_out   (            )
 );
 
-jtframe_mixer #(.W2(8)) u_mixer (
+jtframe_mixer u_mixer (
     .rst   ( rst        ),
     .clk   ( clk        ),
     .cen   ( fm_cen     ),
     .ch0   ( left       ),
     .ch1   ( right      ),
-    .ch2   ( debug_bus ? pcm_good : pcm_fir[15:8] ),
+    .ch2   ( debug_bus[0] ? { pcm_good-8'h80, 8'd0 } : pcm_fir ),
     .ch3   ( 16'd0      ),
     .gain0 ( FM_GAIN    ),
     .gain1 ( FM_GAIN    ),
