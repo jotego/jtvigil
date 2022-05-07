@@ -48,7 +48,7 @@ module jtvigil_snd(
 );
 
 wire [7:0] FM_GAIN  = enable_fm  ? 8'h08 : 8'h0,
-           PCM_GAIN = enable_psg ? 8'h08 : 8'h0;
+           PCM_GAIN = enable_psg ? 8'h0C : 8'h0;
 
 wire [15:0] A;
 wire [ 7:0] ram_dout, fm_dout, cpu_dout, int_addr;
@@ -194,27 +194,18 @@ jt51 u_jt51 (
     .xright  ( right      )
 );
 
-wire [15:0] pcm_fir;
-wire [ 7:0] pcm_ac;
-wire        pcm2_sample;
+wire signed [15:0] pcm_lpf;
+wire signed [ 7:0] pcm_ac;
 
-jtframe_dcrm u_dcrm(
+assign pcm_ac = 8'h80 - pcm_good;
+
+jtframe_pole u_lpf(
     .rst     ( rst        ),
     .clk     ( clk        ),
     .sample  ( pcm_sample ),
-    .din     ( pcm_good   ),
-    .dout    ( pcm_ac     )
-);
-
-jtframe_uprate2_fir u_uprate(
-    .rst     ( rst        ),
-    .clk     ( clk        ),
-    .sample  ( pcm_sample ),
-    .upsample( pcm2_sample),
-    .l_in    ( { pcm_ac, 8'd0 }   ),
-    .r_in    ( 16'd0      ),
-    .l_out   ( pcm_fir    ),
-    .r_out   (            )
+    .sin     ( { pcm_ac, 8'd0 } ),
+    .a       ( 8'h60      ),    // coefficient, unsigned
+    .sout    ( pcm_lpf    )
 );
 
 jtframe_mixer u_mixer (
@@ -223,7 +214,7 @@ jtframe_mixer u_mixer (
     .cen   ( fm_cen     ),
     .ch0   ( left       ),
     .ch1   ( right      ),
-    .ch2   ( debug_bus[0] ? { pcm_good-8'h80, 8'd0 } : pcm_fir ),
+    .ch2   ( pcm_lpf    ),
     .ch3   ( 16'd0      ),
     .gain0 ( FM_GAIN    ),
     .gain1 ( FM_GAIN    ),
