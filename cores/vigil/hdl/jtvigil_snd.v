@@ -47,8 +47,8 @@ module jtvigil_snd(
     output               peak
 );
 
-wire [7:0] FM_GAIN  = enable_fm  ? 8'h08 : 8'h0,
-           PCM_GAIN = enable_psg ? 8'h0C : 8'h0;
+wire [7:0] FM_GAIN  = enable_fm  ? 8'h06 : 8'h0,
+           PCM_GAIN = enable_psg ? 8'h07 : 8'h0;
 
 wire [15:0] A;
 wire [ 7:0] ram_dout, fm_dout, cpu_dout, int_addr;
