@@ -55,7 +55,7 @@ wire [ 7:0] scan_dout;
 reg  [ 7:0] pre_code, code, attr;
 
 assign ram_we   = scr1_cs & ~main_rnw;
-assign rom_cs   = ~hs; // do not read while HS can occur
+assign rom_cs   = 1; // do not read while HS can occur
 assign rom_addr = { 1'b0, attr[7:4], code, v[2:0], 1'b0 };
 assign pxl = { pal, flip ?
     {pxl_data[31], pxl_data[23], pxl_data[15], pxl_data[7] } :
@@ -86,7 +86,7 @@ always @(posedge clk, posedge rst) begin
         hsum     <= { hraw[8], hraw[7:0] };
         case( hsum[2:0] )
             0: pre_code <= scan_dout;
-            1: if(rom_ok) begin // do not change the rom_addr while rom_ok is low
+            1: /*if(rom_ok) */begin // do not change the rom_addr while rom_ok is low
                 code <= pre_code;
                 attr <= scan_dout;
             end
