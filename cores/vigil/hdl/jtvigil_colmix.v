@@ -96,7 +96,7 @@ always @(posedge clk, posedge rst) begin
         green <= 0;
         blue  <= 0;
     end else begin
-        sub <= sub + 3'd1;
+        sub <= pxl_cen ? 3'd0 : sub + 3'd1;
         `ifndef GRAY
         if( sub[0] )
             case( sub[2:1] )
