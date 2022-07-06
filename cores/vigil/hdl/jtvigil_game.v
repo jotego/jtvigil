@@ -23,8 +23,8 @@ module jtvigil_game(
     input           clk24,
     output          pxl2_cen,   // 12   MHz
     output          pxl_cen,    //  6   MHz
-    output          LHBL_dly,
-    output          LVBL_dly,
+    output          LHBL,
+    output          LVBL,
     output          HS,
     output          VS,
     // cabinet I/O
@@ -93,7 +93,7 @@ module jtvigil_game(
 
 wire        cpu_cen, fm_cen;
 // video signals
-wire        LVBL, LHBL, v1;
+wire        v1;
 
 // SDRAM interface
 wire        main_cs, scr1_cs, scr2_cs, obj_cs, pcm_cs, snd_cs;
@@ -123,8 +123,6 @@ assign dip_flip             = ~flip;
 assign ba_wr                = 0;
 assign ba0_din              = 0;
 assign ba0_din_m            = 3;
-assign LHBL_dly             = LHBL;
-assign LVBL_dly             = LVBL;
 assign debug_view           = 0; // scr1pos[8:1]; //{ flip, 4'd0, scr2col};
 
 jtframe_cen3p57 #(.CLK24(1)) u_cencpu(
